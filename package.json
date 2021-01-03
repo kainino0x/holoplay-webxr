@@ -1,0 +1,30 @@
+{
+  "name": "holoplay-webxr",
+  "version": "0.1.0",
+  "license": "Apache-2.0",
+  "private": true,
+  "description": "Unofficial WebXR implementation for HoloPlay holographic displays, such as Looking Glass.",
+  "repository": "https://github.com/kainino0x/holoplay-webxr",
+  "main": "src/HoloPlayWebXRPolyfill.js",
+  "scripts": {
+    "build": "rollup -c",
+    "serve": "http-server -c-1"
+  },
+  "devDependencies": {
+    "babel-core": "^7.0.0-bridge.0",
+    "babel-loader": "^8.0.6",
+    "babel-preset-env": "^1.7.0",
+    "rollup": "^1.26.3",
+    "rollup-plugin-babel": "^4.3.3",
+    "rollup-plugin-cleanup": "^1.0.1",
+    "rollup-plugin-commonjs": "^8.3.0",
+    "rollup-plugin-node-resolve": "^3.1.1",
+    "rollup-plugin-replace": "^2.2.0",
+    "rollup-plugin-uglify": "^6.0.3",
+    "http-server": "^0.12.3"
+  },
+  "dependencies": {
+    "gl-matrix": "^2.8.1",
+    "webxr-polyfill": "file:./third_party/webxr-polyfill"
+  }
+}

@@ -1,0 +1,6 @@
+[submodule "webxr-polyfill"]
+	path = third_party/webxr-polyfill
+	url = https://github.com/kainino0x/webxr-polyfill.git
+[submodule "webxr-samples"]
+	path = third_party/webxr-samples
+	url = https://github.com/kainino0x/webxr-samples.git

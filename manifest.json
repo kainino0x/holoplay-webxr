@@ -1,0 +1,33 @@
+{
+  "name": "Unofficial WebXR for HoloPlay",
+  "short_name": "Unofficial WebXR for HoloPlay",
+  "version": "0.0.1",
+  "minimum_chrome_version": "10.0",
+  "description": "Unofficial WebXR implementation for HoloPlay holographic displays, such as Looking Glass.",
+  "homepage_url": "https://github.com/kainino0x/holoplay-webxr",
+  "author": "Kai Ninomiya",
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "permissions": [
+    "file://*/*",
+    "http://*/*",
+    "https://*/*",
+    "storage"
+  ],
+  "content_scripts": [{
+    "matches": [
+      "file://*/*",
+      "http://*/*",
+      "https://*/*"
+    ],
+    "js": [
+      "build/extension/holoplay-webxr-document_start.js"
+    ],
+    "run_at": "document_start",
+    "all_frames": true
+  }],
+  "manifest_version": 2
+}

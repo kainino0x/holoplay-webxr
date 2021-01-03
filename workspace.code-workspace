@@ -1,0 +1,14 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "webxr-polyfill"
+		},
+		{
+			"path": "webxr-samples"
+		}
+	],
+	"settings": {}
+}
