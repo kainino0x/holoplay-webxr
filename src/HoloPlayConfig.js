@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import * as HoloPlayCore from 'holoplay-core/dist/holoplaycore.module.js';
+
 export const kDefaultEyeHeight = 1.6;
 
 let config;
@@ -49,26 +51,16 @@ const makeConfig = () => new class extends EventTarget {
       flipImageY: { value: 0 },
       flipSubp: { value: 0 },
     };
-    {
-      // Actually get the values from the HoloPlay service.
-      const ws = new WebSocket('ws://localhost:11222/');
-      const timeout = setTimeout(() => {
-        console.error('HoloPlay Service running, but request timed out (no device attached?)');
-      }, 1000);
-      ws.onmessage = ev => {
-        clearTimeout(timeout);
-        try {
-          this.calibration = deepFreeze(JSON.parse(ev.data));
-        } catch (ex) {
-          console.error('HoloPlay Service running, but provided invalid calibration data:', ev.data);
-        }
-      };
-      ws.onerror = (ev) => {
-        clearTimeout(timeout);
-        console.error('HoloPlay Service not running!', ev);
-      }
-    }
 
+    const client = new HoloPlayCore.Client(
+      (msg) => {
+        this.calibration = msg.devices[0].calibration;
+      },
+      (err) => {
+        console.error('Error creating HoloPlay client:', err);
+      });
+
+    // Set defaults for configurable things
     this.tileHeight = 320;
     this.numViews = 2;
     this.trackballX = 0;
