@@ -226,8 +226,17 @@ export default class HoloPlayXRWebGLLayer extends XRWebGLLayer {
       gl.clearStencil(currentClearStencil);
     };
 
+    const canvas = gl.canvas;
+    const controls = makeControls();
+    const placeholder = document.createElement('canvas');
+
     const blitTextureToDefaultFramebufferIfNeeded = () => {
       if (!this[PRIVATE].holoplayEnabled) return;
+
+      // Make sure the default framebuffer has the correct size (undo any resizing the host page did,
+      // and updating for the latest calibration value).
+      canvas.width = cfg.calibration.screenW.value;
+      canvas.height = cfg.calibration.screenH.value;
 
       const oldVAO = gl.getParameter(GL_VERTEX_ARRAY_BINDING);
       const oldCullFace = gl.getParameter(gl.CULL_FACE);
@@ -273,10 +282,6 @@ export default class HoloPlayXRWebGLLayer extends XRWebGLLayer {
       glBindVertexArray(oldVAO);
     };
 
-    const canvas = gl.canvas;
-    const controls = makeControls();
-    const placeholder = document.createElement('canvas');
-
     let popup;
     window.addEventListener('unload', () => {
       if (popup) popup.close();
@@ -311,14 +316,8 @@ export default class HoloPlayXRWebGLLayer extends XRWebGLLayer {
         canvas.style.height = '100%';
         canvas.addEventListener('dblclick', ondblclick);
 
-        const w = cfg.calibration.screenW.value;
-        const h = cfg.calibration.screenH.value;
-        // Set the actual width and height.
-        canvas.width = w;
-        canvas.height = h;
-        // Then prevent it from changing (redirect changes to the placeholder).
-        Object.defineProperty(canvas, 'width', { configurable: true, get: () => placeholder.width, set: v => { placeholder.width = v; } });
-        Object.defineProperty(canvas, 'height', { configurable: true, get: () => placeholder.height, set: v => { placeholder.height = v; } });
+        canvas.width = cfg.calibration.screenW.value;
+        canvas.height = cfg.calibration.screenH.value;
 
         if (canvas.parentElement) {
           canvas.parentElement.replaceChild(placeholder, canvas);
@@ -336,13 +335,13 @@ export default class HoloPlayXRWebGLLayer extends XRWebGLLayer {
         }
         controls.parentElement.removeChild(controls);
 
+        // Roughly reset the canvas size. This won't work if the page attempted to resize
+        // the canvas while the popup was open.
+        canvas.width = placeholder.width;
+        canvas.height = placeholder.height;
         canvas.classList = placeholder.classList;
         canvas.style.cssText = placeholder.style.cssText;
         canvas.removeEventListener('dblclick', ondblclick);
-
-        // Restore the original writable width/height properties.
-        Object.defineProperty(canvas, 'width', { writable: true, value: placeholder.width });
-        Object.defineProperty(canvas, 'height', { writable: true, value: placeholder.height });
 
         popup.onbeforeunload = undefined;
         popup.close();

@@ -24,6 +24,22 @@ export const getHoloPlayConfig = () => {
   return config;
 };
 
+const kFakeCalibration = {
+  configVersion: "1.0",
+  pitch: { value: 45 },
+  slope: { value: -5 },
+  center: { value: -0.5 },
+  viewCone: { value: 40 },
+  invView: { value: 1 },
+  verticalAngle: { value: 0 },
+  DPI: { value: 338 },
+  screenW: { value: 250 },
+  screenH: { value: 250 },
+  flipImageX: { value: 0 },
+  flipImageY: { value: 0 },
+  flipSubp: { value: 0 },
+};
+
 const makeConfig = () => new class extends EventTarget {
   constructor() {
     super();
@@ -36,21 +52,7 @@ const makeConfig = () => new class extends EventTarget {
     fireChanged(false);
 
     // Placeholder values while we wait for the HoloPlay service.
-    this.calibration = {
-      configVersion: "1.0",
-      pitch: { value: 45 },
-      slope: { value: -5 },
-      center: { value: -0.5 },
-      viewCone: { value: 40 },
-      invView: { value: 1 },
-      verticalAngle: { value: 0 },
-      DPI: { value: 338 },
-      screenW: { value: 2560 },
-      screenH: { value: 1600 },
-      flipImageX: { value: 0 },
-      flipImageY: { value: 0 },
-      flipSubp: { value: 0 },
-    };
+    this.calibration = kFakeCalibration;
 
     const client = new HoloPlayCore.Client(
       (msg) => {

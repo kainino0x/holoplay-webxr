@@ -7054,6 +7054,21 @@ host this content on a secure origin for the best user experience.
                   if (config === undefined) config = makeConfig();
                   return config;
                 };
+                const kFakeCalibration = {
+                  configVersion: "1.0",
+                  pitch: { value: 45 },
+                  slope: { value: -5 },
+                  center: { value: -0.5 },
+                  viewCone: { value: 40 },
+                  invView: { value: 1 },
+                  verticalAngle: { value: 0 },
+                  DPI: { value: 338 },
+                  screenW: { value: 250 },
+                  screenH: { value: 250 },
+                  flipImageX: { value: 0 },
+                  flipImageY: { value: 0 },
+                  flipSubp: { value: 0 },
+                };
                 const makeConfig = () => new class extends EventTarget {
                   constructor() {
                     super();
@@ -7063,21 +7078,7 @@ host this content on a secure origin for the best user experience.
                       changePromise.then(() => fireChanged(true));
                     };
                     fireChanged(false);
-                    this.calibration = {
-                      configVersion: "1.0",
-                      pitch: { value: 45 },
-                      slope: { value: -5 },
-                      center: { value: -0.5 },
-                      viewCone: { value: 40 },
-                      invView: { value: 1 },
-                      verticalAngle: { value: 0 },
-                      DPI: { value: 338 },
-                      screenW: { value: 2560 },
-                      screenH: { value: 1600 },
-                      flipImageX: { value: 0 },
-                      flipImageY: { value: 0 },
-                      flipSubp: { value: 0 },
-                    };
+                    this.calibration = kFakeCalibration;
                     const client = new Client(
                       (msg) => {
                         this.calibration = msg.devices[0].calibration;
@@ -7318,8 +7319,13 @@ host this content on a secure origin for the best user experience.
                       gl.clearDepth(currentClearDepth);
                       gl.clearStencil(currentClearStencil);
                     };
+                    const canvas = gl.canvas;
+                    const controls = makeControls();
+                    const placeholder = document.createElement('canvas');
                     const blitTextureToDefaultFramebufferIfNeeded = () => {
                       if (!this[PRIVATE$j].holoplayEnabled) return;
+                      canvas.width = cfg.calibration.screenW.value;
+                      canvas.height = cfg.calibration.screenH.value;
                       const oldVAO = gl.getParameter(GL_VERTEX_ARRAY_BINDING);
                       const oldCullFace = gl.getParameter(gl.CULL_FACE);
                       const oldBlend = gl.getParameter(gl.BLEND);
@@ -7360,9 +7366,6 @@ host this content on a secure origin for the best user experience.
                       (oldCullFace ? glEnable : glDisable)(gl.CULL_FACE);
                       glBindVertexArray(oldVAO);
                     };
-                    const canvas = gl.canvas;
-                    const controls = makeControls();
-                    const placeholder = document.createElement('canvas');
                     let popup;
                     window.addEventListener('unload', () => {
                       if (popup) popup.close();
@@ -7393,12 +7396,8 @@ host this content on a secure origin for the best user experience.
                         canvas.style.width = '100%';
                         canvas.style.height = '100%';
                         canvas.addEventListener('dblclick', ondblclick);
-                        const w = cfg.calibration.screenW.value;
-                        const h = cfg.calibration.screenH.value;
-                        canvas.width = w;
-                        canvas.height = h;
-                        Object.defineProperty(canvas, 'width', { configurable: true, get: () => placeholder.width, set: v => { placeholder.width = v; } });
-                        Object.defineProperty(canvas, 'height', { configurable: true, get: () => placeholder.height, set: v => { placeholder.height = v; } });
+                        canvas.width = cfg.calibration.screenW.value;
+                        canvas.height = cfg.calibration.screenH.value;
                         if (canvas.parentElement) {
                           canvas.parentElement.replaceChild(placeholder, canvas);
                         }
@@ -7413,11 +7412,11 @@ host this content on a secure origin for the best user experience.
                           placeholder.parentElement.replaceChild(canvas, placeholder);
                         }
                         controls.parentElement.removeChild(controls);
+                        canvas.width = placeholder.width;
+                        canvas.height = placeholder.height;
                         canvas.classList = placeholder.classList;
                         canvas.style.cssText = placeholder.style.cssText;
                         canvas.removeEventListener('dblclick', ondblclick);
-                        Object.defineProperty(canvas, 'width', { writable: true, value: placeholder.width });
-                        Object.defineProperty(canvas, 'height', { writable: true, value: placeholder.height });
                         popup.onbeforeunload = undefined;
                         popup.close();
                         popup = undefined;
