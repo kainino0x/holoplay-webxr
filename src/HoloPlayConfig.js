@@ -56,6 +56,13 @@ const makeConfig = () => new class extends EventTarget {
 
     const client = new HoloPlayCore.Client(
       (msg) => {
+        if (msg.devices.length < 1) {
+          console.error('No HoloPlay devices found!');
+          return;
+        }
+        if (msg.devices.length > 1) {
+          console.warn('More than one HoloPlay device found... using the first one');
+        }
         this.calibration = msg.devices[0].calibration;
       },
       (err) => {
