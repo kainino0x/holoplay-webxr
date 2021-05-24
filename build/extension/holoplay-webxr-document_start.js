@@ -7454,24 +7454,33 @@ host this content on a secure origin for the best user experience.
                   const cfg = getHoloPlayConfig();
                   const styleElement = document.createElement('style');
                   document.head.appendChild(styleElement);
-                  styleElement.sheet.insertRule('#HoloPlayWebXRControls * { all: revert; }');
+                  styleElement.sheet.insertRule(
+                    '#HoloPlayWebXRControls * { all: revert; font-family: sans-serif }');
                   const c = document.createElement('div');
                   c.id = 'HoloPlayWebXRControls';
                   c.style.position = 'fixed';
                   c.style.zIndex = 1000;
-                  c.style.height = '580px';
-                  c.style.width = '360px';
+                  c.style.padding = '4px';
+                  c.style.width = '315px';
+                  c.style.height = '280px';
+                  c.style.maxWidth = 'calc(100vw - 18px)';
+                  c.style.maxHeight = 'calc(100vh - 18px)';
+                  c.style.whiteSpace = 'nowrap';
+                  c.style.overflowY = 'scroll';
+                  c.style.scrollbarWidth = 'thin';
+                  c.style.scrollbarColor = 'thistle transparent';
                   c.style.background = 'rgba(0, 0, 0, 0.6)';
                   c.style.color = 'white';
+                  c.style.padding = '2px';
                   c.style.border = '3px solid black';
-                  c.style.borderRadius = '12px';
                   c.style.right = '6px';
                   c.style.bottom = '6px';
-                  const title = document.createElement('h3');
+                  const title = document.createElement('div');
                   c.appendChild(title);
                   title.style.width = '100%';
                   title.style.textAlign = 'center';
-                  title.innerText = 'HoloPlay View Controls';
+                  title.style.fontWeight = 'bold';
+                  title.innerText = 'HoloPlay View Controls ';
                   const lrToggle = document.createElement('input');
                   title.appendChild(lrToggle);
                   lrToggle.type = 'button';
@@ -7481,34 +7490,37 @@ host this content on a secure origin for the best user experience.
                     [c.style.right, c.style.left] = [c.style.left, c.style.right];
                     [lrToggle.value, lrToggle._otherValue] = [lrToggle._otherValue, lrToggle.value];
                   };
-                  const ul = document.createElement('ul');
-                  c.appendChild(ul);
+                  const controlListDiv = document.createElement('div');
+                  c.appendChild(controlListDiv);
                   const addControl = (name, options, rest) => {
-                    const desc = rest.desc;
                     const stringify = rest.stringify;
-                    const li = document.createElement('li');
-                    ul.appendChild(li);
+                    const controlLineDiv = document.createElement('div');
+                    controlListDiv.appendChild(controlLineDiv);
                     const controlID = name;
                     const initialValue = cfg[name];
                     const label = document.createElement('label');
-                    li.appendChild(label);
-                    label.innerText = desc;
+                    controlLineDiv.appendChild(label);
+                    label.innerText = rest.label;
                     label.setAttribute('for', controlID);
+                    label.style.width = '80px';
+                    label.style.display = 'inline-block';
+                    label.style.textDecoration = 'dotted underline 1px';
+                    label.title = rest.title;
                     if (options.type !== 'checkbox') {
-                      li.append(document.createElement('br'));
                       const reset = document.createElement('input');
-                      li.appendChild(reset);
+                      controlLineDiv.appendChild(reset);
                       reset.type = 'button';
                       reset.value = '⎌';
                       reset.alt = 'reset';
                       reset.title = 'Reset value to default';
+                      reset.style.padding = '0 4px';
                       reset.onclick = () => {
                         control.value = initialValue;
                         control.oninput();
                       };
                     }
                     const control = document.createElement('input');
-                    li.appendChild(control);
+                    controlLineDiv.appendChild(control);
                     Object.assign(control, options);
                     control.id = controlID;
                     control.value = options.value !== undefined ? options.value : initialValue;
@@ -7524,6 +7536,8 @@ host this content on a secure origin for the best user experience.
                       updateValue(newValue);
                     };
                     if (options.type === 'range') {
+                      control.style.width = '110px';
+                      control.style.height = '16px';
                       control.onwheel = ev => {
                         const newValue = parseFloat(control.value) + Math.sign(ev.deltaX - ev.deltaY) * options.step;
                         control.value = newValue;
@@ -7533,7 +7547,7 @@ host this content on a secure origin for the best user experience.
                     let updateNumberText = () => { };
                     if (stringify) {
                       const numberText = document.createElement('span');
-                      li.appendChild(numberText);
+                      controlLineDiv.appendChild(numberText);
                       updateNumberText = v => { numberText.innerHTML = stringify(v); };
                       updateNumberText(initialValue);
                     }
@@ -7541,64 +7555,76 @@ host this content on a secure origin for the best user experience.
                   addControl('tileHeight',
                     { type: 'range', min: 160, max: 455, step: 1 },
                     {
-                      desc: 'resolution of each view',
-                      stringify: v => `${(v * cfg.aspect).toFixed()} &times; ${v.toFixed()}`
+                      label: 'resolution',
+                      title: 'resolution of each view',
+                      stringify: v => `${(v * cfg.aspect).toFixed()}&times;${v.toFixed()}`
                     });
                   addControl('numViews',
                     { type: 'range', min: 1, max: 145, step: 1 },
                     {
-                      desc: 'number of views to render',
+                      label: '# views',
+                      title: 'number of different viewing angles to render',
                       stringify: v => v.toFixed()
                     });
                   addControl('trackballX',
                     { type: 'range', min: -Math.PI, max: 1.0001 * Math.PI, step: 0.5 / 180 * Math.PI },
                     {
-                      desc: 'camera trackball x',
+                      label: 'trackball x',
+                      title: 'camera trackball x',
                       stringify: v => `${(v / Math.PI * 180).toFixed()}&deg;`
                     });
                   addControl('trackballY',
                     { type: 'range', min: -0.5 * Math.PI, max: 0.5001 * Math.PI, step: 1.0 / 180 * Math.PI },
                     {
-                      desc: 'camera trackball y',
+                      label: 'trackball y',
+                      title: 'camera trackball y',
                       stringify: v => `${(v / Math.PI * 180).toFixed()}&deg;`
                     });
                   addControl('targetX',
                     { type: 'range', min: -20, max: 20, step: 0.1 },
                     {
-                      desc: 'target position x',
+                      label: 'target x',
+                      title: 'target position x',
                       stringify: v => v.toFixed(2) + ' m'
                     });
                   addControl('targetY',
                     { type: 'range', min: -20, max: 20, step: 0.1 },
                     {
-                      desc: 'target position y',
+                      label: 'target y',
+                      title: 'target position y',
                       stringify: v => v.toFixed(2) + ' m'
                     });
                   addControl('targetZ',
                     { type: 'range', min: -20, max: 20, step: 0.1 },
                     {
-                      desc: 'target position z',
+                      label: 'target z',
+                      title: 'target position z',
                       stringify: v => v.toFixed(2) + ' m'
                     });
                   addControl('targetDiam',
                     { type: 'range', min: 0.2, max: 20, step: 0.1 },
                     {
-                      desc: 'target sphere diameter',
+                      label: 'target size',
+                      title: 'diameter of the target sphere to fit in the screen',
                       stringify: v => `${(v * 100).toFixed()} cm`
                     });
                   addControl('fovy',
                     { type: 'range', min: 1.0 / 180 * Math.PI, max: 120.1 / 180 * Math.PI, step: 1.0 / 180 * Math.PI },
                     {
-                      desc: 'perspective fov (degrades stereo effect)',
+                      label: 'fov',
+                      title: 'perspective fov (degrades stereo effect)',
                       stringify: v => {
                         const xdeg = (v / Math.PI * 180);
                         const ydeg = Math.atan(Math.tan(v / 2) * cfg.aspect) * 2 / Math.PI * 180;
-                        return `${xdeg.toFixed(1)}&deg; &times; ${ydeg.toFixed(1)}&deg;`;
+                        return `${xdeg.toFixed()}&deg;&times;${ydeg.toFixed()}&deg;`;
                       }
                     });
                   addControl('debugView',
                     { type: 'checkbox' },
-                    { desc: 'enable debug view' });
+                    {
+                      label: 'debug',
+                      title: 'enable "quilted" debug view',
+                    });
                   return c;
                 }
 
