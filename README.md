@@ -8,7 +8,8 @@ This project contains both a **library** and a **WebExtension** that injects the
 This repo contains builds of both the library and the (unpacked) extension.
 In order to install the extension, simply clone the repository and point your browser at the directory.
 (Tested in Chrome 89 and Firefox 86.)
-- To install in Chrome, navigate to [chrome://extensions](chrome://extensions), select the `Load Unpacked`button and point at the cloned directory.
+
+- To install in Chrome, navigate to `chrome://extensions`, select the `Load Unpacked` button, and point at the cloned directory.
 
 Thanks to [WebXR Emulator Extension](https://github.com/MozillaReality/WebXR-emulator-extension)
 from which I took the skeleton of this project.
