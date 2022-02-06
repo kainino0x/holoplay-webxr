@@ -7098,7 +7098,8 @@ host this content on a secure origin for the best user experience.
                     this.targetZ = -0.5;
                     this.targetDiam = 2.0;
                     this.fovy = 13.0 / 180 * Math.PI;
-                    this.debugView = false;
+                    this.depthiness = 1.0;
+                    this.inlineView = 1;
                   }
                   get calibration() { return this._calibration; }
                   set calibration(v) { this._calibration = deepFreeze(v); this._ensureConfigChangeEvent(); }
@@ -7111,7 +7112,8 @@ host this content on a secure origin for the best user experience.
                   get trackballY() { return this._trackballY; } set trackballY(v) { this._trackballY = v; this._ensureConfigChangeEvent(); }
                   get targetDiam() { return this._targetDiam; } set targetDiam(v) { this._targetDiam = v; this._ensureConfigChangeEvent(); }
                   get fovy      () { return this._fovy;       } set fovy      (v) { this._fovy       = v; this._ensureConfigChangeEvent(); }
-                  get debugView () { return this._debugView;  } set debugView (v) { this._debugView  = v; this._ensureConfigChangeEvent(); }
+                  get depthiness() { return this._depthiness; } set depthiness(v) { this._depthiness = v; this._ensureConfigChangeEvent(); }
+                  get inlineView() { return this._inlineView; } set inlineView(v) { this._inlineView = v; this._ensureConfigChangeEvent(); }
                   get aspect() { return this.calibration.screenW.value / this.calibration.screenH.value; }
                   get tileWidth() { return Math.round(this.tileHeight * this.aspect); }
                   get framebufferWidth() {
@@ -7121,7 +7123,7 @@ host this content on a secure origin for the best user experience.
                   get quiltWidth() { return Math.floor(this.framebufferWidth / this.tileWidth); }
                   get quiltHeight() { return Math.ceil(this.numViews / this.quiltWidth); }
                   get framebufferHeight() { return 2 ** Math.ceil(Math.log2(this.quiltHeight * this.tileHeight)); }
-                  get viewCone() { return this.calibration.viewCone.value / 180 * Math.PI; }
+                  get viewCone() { return this.calibration.viewCone.value * this.depthiness / 180 * Math.PI; }
                   get tilt() {
                     return this.calibration.screenH.value /
                       (this.calibration.screenW.value * this.calibration.slope.value) *
@@ -7224,10 +7226,12 @@ host this content on a secure origin for the best user experience.
                     }
                     let lastGeneratedFSSource;
                     let a_location;
+                    let u_viewType;
                     const recompileProgram = () => {
                       const fsSource = glslifyNumbers`
         // Shader copied from HoloPlay.js
         precision mediump float;
+        uniform int u_viewType;
         uniform sampler2D u_texture;
         varying vec2 v_texcoord;
         const float pitch    = ${cfg.pitch};
@@ -7253,6 +7257,14 @@ host this content on a secure origin for the best user experience.
           return (value - from1) / (to1 - from1) * (to2 - from2) + from2;
         }
         void main() {
+          if (u_viewType == 2) { // "quilt" view
+            gl_FragColor = texture2D(u_texture, v_texcoord);
+            return;
+          }
+          if (u_viewType == 1) { // middle view
+            gl_FragColor = texture2D(u_texture, texArr(vec3(v_texcoord.x, v_texcoord.y, 0.5)));
+            return;
+          }
           vec4 rgb[3];
           vec3 nuv = vec3(v_texcoord.xy, 0.0);
           // Flip UVs if necessary
@@ -7264,9 +7276,7 @@ host this content on a secure origin for the best user experience.
             nuv.z = (1.0 - invView) * nuv.z + invView * (1.0 - nuv.z);
             rgb[i] = texture2D(u_texture, texArr(vec3(v_texcoord.x, v_texcoord.y, nuv.z)));
           }
-          gl_FragColor = ${cfg.debugView ?
-          'texture2D(u_texture, v_texcoord)' :
-          'vec4(rgb[0].r, rgb[1].g, rgb[2].b, 1)'};
+          gl_FragColor = vec4(rgb[0].r, rgb[1].g, rgb[2].b, 1);
         }
       `;
                       if (fsSource === lastGeneratedFSSource) return;
@@ -7283,6 +7293,7 @@ host this content on a secure origin for the best user experience.
                         return;
                       }
                       a_location = gl.getAttribLocation(program, 'a_position');
+                      u_viewType = gl.getUniformLocation(program, 'u_viewType');
                       const u_texture = gl.getUniformLocation(program, 'u_texture');
                       const oldProgram = gl.getParameter(gl.CURRENT_PROGRAM);
                       {
@@ -7322,13 +7333,23 @@ host this content on a secure origin for the best user experience.
                       gl.clearDepth(currentClearDepth);
                       gl.clearStencil(currentClearStencil);
                     };
-                    const canvas = gl.canvas;
-                    const controls = makeControls();
-                    const placeholder = document.createElement('canvas');
+                    const appCanvas = gl.canvas;
+                    const lkgCanvas = document.createElement('canvas');
+                    const ctx = lkgCanvas.getContext('2d', { alpha: false });
+                    lkgCanvas.addEventListener('dblclick', function () {
+                      this.requestFullscreen();
+                    });
+                    const controls = makeControls(() => popup, lkgCanvas);
+                    let origWidth, origHeight;
                     const blitTextureToDefaultFramebufferIfNeeded = () => {
                       if (!this[PRIVATE$j].holoplayEnabled) return;
-                      canvas.width = cfg.calibration.screenW.value;
-                      canvas.height = cfg.calibration.screenH.value;
+                      if (appCanvas.width !== cfg.calibration.screenW.value ||
+                          appCanvas.height !== cfg.calibration.screenH.value) {
+                        origWidth = appCanvas.width;
+                        origHeight = appCanvas.height;
+                        appCanvas.width = cfg.calibration.screenW.value;
+                        appCanvas.height = cfg.calibration.screenH.value;
+                      }
                       const oldVAO = gl.getParameter(GL_VERTEX_ARRAY_BINDING);
                       const oldCullFace = gl.getParameter(gl.CULL_FACE);
                       const oldBlend = gl.getParameter(gl.BLEND);
@@ -7353,7 +7374,14 @@ host this content on a secure origin for the best user experience.
                           gl.disable(gl.DEPTH_TEST);
                           gl.disable(gl.STENCIL_TEST);
                           gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
+                          gl.uniform1i(u_viewType, 0);
                           gl.drawArrays(gl.TRIANGLES, 0, 6);
+                          ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+                          ctx.drawImage(appCanvas, 0, 0);
+                          if (cfg.inlineView !== 0) {
+                            gl.uniform1i(u_viewType, cfg.inlineView);
+                            gl.drawArrays(gl.TRIANGLES, 0, 6);
+                          }
                         }
                         gl.bindTexture(gl.TEXTURE_2D, oldTextureBinding);
                       }
@@ -7374,52 +7402,28 @@ host this content on a secure origin for the best user experience.
                       if (popup) popup.close();
                       popup = undefined;
                     });
-                    const ondblclick = function () {
-                      this.requestFullscreen();
-                    };
                     const moveCanvasToWindow = (enabled, onbeforeunload) => {
                       if (!!popup == enabled) return;
                       if (enabled) {
                         recompileProgram();
-                        placeholder.width = canvas.width;
-                        placeholder.height = canvas.height;
-                        placeholder.classList = canvas.classList;
-                        placeholder.style.cssText = canvas.style.cssText;
-                        {
-                          placeholder.style.backgroundColor = 'lightgray';
-                          placeholder.style.backgroundSize = '14px 14px';
-                          placeholder.style.backgroundPosition = 'center';
-                          placeholder.style.backgroundImage = 'radial-gradient(steelblue 1px, lightgray 1px)';
-                        }
-                        canvas.classList = [];
-                        canvas.style.cssText = '';
-                        canvas.style.position = 'fixed';
-                        canvas.style.top = '0';
-                        canvas.style.left = '0';
-                        canvas.style.width = '100%';
-                        canvas.style.height = '100%';
-                        canvas.addEventListener('dblclick', ondblclick);
-                        canvas.width = cfg.calibration.screenW.value;
-                        canvas.height = cfg.calibration.screenH.value;
-                        if (canvas.parentElement) {
-                          canvas.parentElement.replaceChild(placeholder, canvas);
-                        }
+                        lkgCanvas.style.position = 'fixed';
+                        lkgCanvas.style.top = '0';
+                        lkgCanvas.style.left = '0';
+                        lkgCanvas.style.width = '100%';
+                        lkgCanvas.style.height = '100%';
+                        lkgCanvas.width = cfg.calibration.screenW.value;
+                        lkgCanvas.height = cfg.calibration.screenH.value;
                         document.body.appendChild(controls);
-                        popup = window.open('', undefined, 'width=400,height=400');
+                        popup = window.open('', undefined, 'width=640,height=360');
                         popup.document.title = 'HoloPlay Window (fullscreen me on Looking Glass!)';
-                        popup.document.body.appendChild(canvas);
+                        popup.document.body.style.background = 'black';
+                        popup.document.body.appendChild(lkgCanvas);
                         console.assert(onbeforeunload);
                         popup.onbeforeunload = onbeforeunload;
                       } else {
-                        if (placeholder.parentElement) {
-                          placeholder.parentElement.replaceChild(canvas, placeholder);
-                        }
                         controls.parentElement.removeChild(controls);
-                        canvas.width = placeholder.width;
-                        canvas.height = placeholder.height;
-                        canvas.classList = placeholder.classList;
-                        canvas.style.cssText = placeholder.style.cssText;
-                        canvas.removeEventListener('dblclick', ondblclick);
+                        appCanvas.width = origWidth;
+                        appCanvas.height = origHeight;
                         popup.onbeforeunload = undefined;
                         popup.close();
                         popup = undefined;
@@ -7446,7 +7450,7 @@ host this content on a secure origin for the best user experience.
                   }
                   return s;
                 }
-                function makeControls() {
+                function makeControls(getPopup, lkgCanvas) {
                   const cfg = getHoloPlayConfig();
                   const styleElement = document.createElement('style');
                   document.head.appendChild(styleElement);
@@ -7458,7 +7462,7 @@ host this content on a secure origin for the best user experience.
                   c.style.zIndex = 1000;
                   c.style.padding = '4px';
                   c.style.width = '315px';
-                  c.style.height = '280px';
+                  c.style.height = '310px';
                   c.style.maxWidth = 'calc(100vw - 18px)';
                   c.style.maxHeight = 'calc(100vh - 18px)';
                   c.style.whiteSpace = 'nowrap';
@@ -7488,21 +7492,21 @@ host this content on a secure origin for the best user experience.
                   };
                   const controlListDiv = document.createElement('div');
                   c.appendChild(controlListDiv);
-                  const addControl = (name, options, rest) => {
-                    const stringify = rest.stringify;
+                  const addControl = (name, attrs, opts) => {
+                    const stringify = opts.stringify;
                     const controlLineDiv = document.createElement('div');
                     controlListDiv.appendChild(controlLineDiv);
                     const controlID = name;
                     const initialValue = cfg[name];
                     const label = document.createElement('label');
                     controlLineDiv.appendChild(label);
-                    label.innerText = rest.label;
+                    label.innerText = opts.label;
                     label.setAttribute('for', controlID);
                     label.style.width = '80px';
                     label.style.display = 'inline-block';
                     label.style.textDecoration = 'dotted underline 1px';
-                    label.title = rest.title;
-                    if (options.type !== 'checkbox') {
+                    label.title = opts.title;
+                    if (attrs.type !== 'checkbox') {
                       const reset = document.createElement('input');
                       controlLineDiv.appendChild(reset);
                       reset.type = 'button';
@@ -7517,27 +7521,36 @@ host this content on a secure origin for the best user experience.
                     }
                     const control = document.createElement('input');
                     controlLineDiv.appendChild(control);
-                    Object.assign(control, options);
+                    Object.assign(control, attrs);
                     control.id = controlID;
-                    control.value = options.value !== undefined ? options.value : initialValue;
+                    control.title = opts.title;
+                    control.value = attrs.value !== undefined ? attrs.value : initialValue;
                     const updateValue = newValue => {
                       cfg[name] = newValue;
                       updateNumberText(newValue);
                     };
                     control.oninput = () => {
                       const newValue =
-                        options.type === 'range' ? parseFloat(control.value) :
-                          options.type === 'checkbox' ? control.checked :
+                        attrs.type === 'range' ? parseFloat(control.value) :
+                          attrs.type === 'checkbox' ? control.checked :
                             control.value;
                       updateValue(newValue);
                     };
-                    if (options.type === 'range') {
+                    const updateExternally = callback => {
+                      let newValue = callback(cfg[name]);
+                      if (opts.fixRange) {
+                        newValue = opts.fixRange(newValue);
+                        control.max = Math.max(parseFloat(control.max), newValue);
+                        control.min = Math.min(parseFloat(control.min), newValue);
+                      }
+                      control.value = newValue;
+                      updateValue(newValue);
+                    };
+                    if (attrs.type === 'range') {
                       control.style.width = '110px';
                       control.style.height = '16px';
                       control.onwheel = ev => {
-                        const newValue = parseFloat(control.value) + Math.sign(ev.deltaX - ev.deltaY) * options.step;
-                        control.value = newValue;
-                        updateValue(newValue);
+                        updateExternally(oldValue => oldValue + Math.sign(ev.deltaX - ev.deltaY) * attrs.step);
                       };
                     }
                     let updateNumberText = () => { };
@@ -7547,80 +7560,121 @@ host this content on a secure origin for the best user experience.
                       updateNumberText = v => { numberText.innerHTML = stringify(v); };
                       updateNumberText(initialValue);
                     }
+                    return updateExternally;
                   };
                   addControl('tileHeight',
                     { type: 'range', min: 160, max: 455, step: 1 },
                     {
                       label: 'resolution',
                       title: 'resolution of each view',
-                      stringify: v => `${(v * cfg.aspect).toFixed()}&times;${v.toFixed()}`
+                      stringify: v => `${(v * cfg.aspect).toFixed()}&times;${v.toFixed()}`,
                     });
                   addControl('numViews',
                     { type: 'range', min: 1, max: 145, step: 1 },
                     {
                       label: '# views',
                       title: 'number of different viewing angles to render',
-                      stringify: v => v.toFixed()
+                      stringify: v => v.toFixed(),
                     });
-                  addControl('trackballX',
+                  const setTrackballX = addControl('trackballX',
                     { type: 'range', min: -Math.PI, max: 1.0001 * Math.PI, step: 0.5 / 180 * Math.PI },
                     {
                       label: 'trackball x',
                       title: 'camera trackball x',
-                      stringify: v => `${(v / Math.PI * 180).toFixed()}&deg;`
+                      fixRange: v => (v + Math.PI * 3) % (Math.PI * 2) - Math.PI,
+                      stringify: v => `${(v / Math.PI * 180).toFixed()}&deg;`,
                     });
-                  addControl('trackballY',
+                  const setTrackballY = addControl('trackballY',
                     { type: 'range', min: -0.5 * Math.PI, max: 0.5001 * Math.PI, step: 1.0 / 180 * Math.PI },
                     {
                       label: 'trackball y',
                       title: 'camera trackball y',
-                      stringify: v => `${(v / Math.PI * 180).toFixed()}&deg;`
+                      fixRange: v => Math.max(-0.5 * Math.PI, Math.min(v, 0.5 * Math.PI)),
+                      stringify: v => `${(v / Math.PI * 180).toFixed()}&deg;`,
                     });
-                  addControl('targetX',
+                  const setTargetX = addControl('targetX',
                     { type: 'range', min: -20, max: 20, step: 0.1 },
                     {
                       label: 'target x',
                       title: 'target position x',
-                      stringify: v => v.toFixed(2) + ' m'
+                      fixRange: v => v,
+                      stringify: v => v.toFixed(2) + ' m',
                     });
-                  addControl('targetY',
+                  const setTargetY = addControl('targetY',
                     { type: 'range', min: -20, max: 20, step: 0.1 },
                     {
                       label: 'target y',
                       title: 'target position y',
-                      stringify: v => v.toFixed(2) + ' m'
+                      fixRange: v => v,
+                      stringify: v => v.toFixed(2) + ' m',
                     });
-                  addControl('targetZ',
+                  const setTargetZ = addControl('targetZ',
                     { type: 'range', min: -20, max: 20, step: 0.1 },
                     {
                       label: 'target z',
                       title: 'target position z',
-                      stringify: v => v.toFixed(2) + ' m'
+                      fixRange: v => v,
+                      stringify: v => v.toFixed(2) + ' m',
                     });
-                  addControl('targetDiam',
+                  const setTargetDiam = addControl('targetDiam',
                     { type: 'range', min: 0.2, max: 20, step: 0.1 },
                     {
                       label: 'target size',
                       title: 'diameter of the target sphere to fit in the screen',
-                      stringify: v => `${(v * 100).toFixed()} cm`
+                      fixRange: v => Math.max(0.2, v),
+                      stringify: v => `${(v * 100).toFixed()} cm`,
                     });
                   addControl('fovy',
                     { type: 'range', min: 1.0 / 180 * Math.PI, max: 120.1 / 180 * Math.PI, step: 1.0 / 180 * Math.PI },
                     {
                       label: 'fov',
                       title: 'perspective fov (degrades stereo effect)',
+                      fixRange: v => Math.max(1.0 / 180 * Math.PI, Math.min(v, 120.1 / 180 * Math.PI)),
                       stringify: v => {
                         const xdeg = (v / Math.PI * 180);
                         const ydeg = Math.atan(Math.tan(v / 2) * cfg.aspect) * 2 / Math.PI * 180;
                         return `${xdeg.toFixed()}&deg;&times;${ydeg.toFixed()}&deg;`;
-                      }
+                      },
                     });
-                  addControl('debugView',
-                    { type: 'checkbox' },
+                  addControl('depthiness',
+                    { type: 'range', min: 0, max: 2, step: 0.1 },
                     {
-                      label: 'debug',
-                      title: 'enable "quilted" debug view',
+                      label: 'depthiness',
+                      title: 'multiplier for the physical view cone width (1.0 should be physically accurate)',
+                      fixRange: v => Math.max(0, v),
+                      stringify: v => `${v.toFixed(1)}x`,
                     });
+                  addControl('inlineView',
+                    { type: 'range', min: 0, max: 2, step: 1 },
+                    {
+                      label: 'inline view',
+                      title: 'what to show inline on the original canvas (swizzled = no overwrite)',
+                      fixRange: v => Math.max(0, Math.min(v, 2)),
+                      stringify: v => v === 0 ? 'swizzled' : v === 1 ? 'center' : v === 2 ? 'quilt' : '?',
+                    });
+                  lkgCanvas.oncontextmenu = ev => { ev.preventDefault(); };
+                  lkgCanvas.addEventListener('wheel', ev => {
+                    setTargetDiam(old => {
+                      const GAMMA = 1.1;
+                      const logOld = Math.log(old) / Math.log(GAMMA);
+                      return Math.pow(GAMMA, logOld + ev.deltaY * 0.01);
+                    });
+                  });
+                  lkgCanvas.addEventListener('mousemove', ev => {
+                    const mx = ev.movementX, my = -ev.movementY;
+                    if ((ev.buttons & 2) || ((ev.buttons & 1) && (ev.shiftKey || ev.ctrlKey))) {
+                      const tx = cfg.trackballX, ty = cfg.trackballY;
+                      const dx = -Math.cos(tx) * mx + Math.sin(tx) * Math.sin(ty) * my;
+                      const dy =                                    -Math.cos(ty) * my;
+                      const dz =  Math.sin(tx) * mx + Math.cos(tx) * Math.sin(ty) * my;
+                      setTargetX(v => v + dx * cfg.targetDiam * 0.001);
+                      setTargetY(v => v + dy * cfg.targetDiam * 0.001);
+                      setTargetZ(v => v + dz * cfg.targetDiam * 0.001);
+                    } else if (ev.buttons & 1) {
+                      setTrackballX(v => v - mx * 0.01);
+                      setTrackballY(v => v - my * 0.01);
+                    }
+                  });
                   return c;
                 }
 

@@ -79,7 +79,8 @@ const makeConfig = () => new class extends EventTarget {
     this.targetZ = -0.5;
     this.targetDiam = 2.0;
     this.fovy = 13.0 / 180 * Math.PI;
-    this.debugView = false;
+    this.depthiness = 1.0;
+    this.inlineView = 1;
   }
 
   get calibration() { return this._calibration; }
@@ -96,7 +97,8 @@ const makeConfig = () => new class extends EventTarget {
   get trackballY() { return this._trackballY; } set trackballY(v) { this._trackballY = v; this._ensureConfigChangeEvent(); }
   get targetDiam() { return this._targetDiam; } set targetDiam(v) { this._targetDiam = v; this._ensureConfigChangeEvent(); }
   get fovy      () { return this._fovy;       } set fovy      (v) { this._fovy       = v; this._ensureConfigChangeEvent(); }
-  get debugView () { return this._debugView;  } set debugView (v) { this._debugView  = v; this._ensureConfigChangeEvent(); }
+  get depthiness() { return this._depthiness; } set depthiness(v) { this._depthiness = v; this._ensureConfigChangeEvent(); }
+  get inlineView() { return this._inlineView; } set inlineView(v) { this._inlineView = v; this._ensureConfigChangeEvent(); }
 
   // computed
 
@@ -110,7 +112,7 @@ const makeConfig = () => new class extends EventTarget {
   get quiltHeight() { return Math.ceil(this.numViews / this.quiltWidth); }
   get framebufferHeight() { return 2 ** Math.ceil(Math.log2(this.quiltHeight * this.tileHeight)); }
 
-  get viewCone() { return this.calibration.viewCone.value / 180 * Math.PI; }
+  get viewCone() { return this.calibration.viewCone.value * this.depthiness / 180 * Math.PI; }
   get tilt() {
     return this.calibration.screenH.value /
       (this.calibration.screenW.value * this.calibration.slope.value) *
