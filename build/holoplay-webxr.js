@@ -7462,7 +7462,7 @@ host this content on a secure origin for the best user experience.
                   c.style.zIndex = 1000;
                   c.style.padding = '4px';
                   c.style.width = '315px';
-                  c.style.height = '310px';
+                  c.style.height = '360px';
                   c.style.maxWidth = 'calc(100vw - 18px)';
                   c.style.maxHeight = 'calc(100vh - 18px)';
                   c.style.whiteSpace = 'nowrap';
@@ -7481,6 +7481,12 @@ host this content on a secure origin for the best user experience.
                   title.style.textAlign = 'center';
                   title.style.fontWeight = 'bold';
                   title.innerText = 'HoloPlay View Controls ';
+                  const help = document.createElement('div');
+                  c.appendChild(help);
+                  help.style.width = '100%';
+                  help.style.whiteSpace = 'normal';
+                  help.style.textAlign = 'center';
+                  help.innerHTML = 'Camera: drag mouse left/right buttons and use scroll wheel inside the popup.';
                   const lrToggle = document.createElement('input');
                   title.appendChild(lrToggle);
                   lrToggle.type = 'button';
