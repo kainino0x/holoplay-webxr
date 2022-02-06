@@ -7098,7 +7098,7 @@ host this content on a secure origin for the best user experience.
                     this.targetZ = -0.5;
                     this.targetDiam = 2.0;
                     this.fovy = 13.0 / 180 * Math.PI;
-                    this.depthiness = 1.0;
+                    this.depthiness = 1.25;
                     this.inlineView = 1;
                   }
                   get calibration() { return this._calibration; }
@@ -7643,12 +7643,12 @@ host this content on a secure origin for the best user experience.
                       },
                     });
                   addControl('depthiness',
-                    { type: 'range', min: 0, max: 2, step: 0.1 },
+                    { type: 'range', min: 0, max: 2, step: 0.01 },
                     {
                       label: 'depthiness',
-                      title: 'multiplier for the physical view cone width (1.0 should be physically accurate)',
+                      title: 'exaggerates depth by multiplying the width of the view cone (as reported by the firmware) - can somewhat compensate for depthiness lost using higher fov. 1.25 seems to be most physically accurate on Looking Glass 8.9".',
                       fixRange: v => Math.max(0, v),
-                      stringify: v => `${v.toFixed(1)}x`,
+                      stringify: v => `${v.toFixed(2)}x`,
                     });
                   addControl('inlineView',
                     { type: 'range', min: 0, max: 2, step: 1 },

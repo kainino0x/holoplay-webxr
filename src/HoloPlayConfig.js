@@ -79,7 +79,7 @@ const makeConfig = () => new class extends EventTarget {
     this.targetZ = -0.5;
     this.targetDiam = 2.0;
     this.fovy = 13.0 / 180 * Math.PI;
-    this.depthiness = 1.0;
+    this.depthiness = 1.25;
     this.inlineView = 1;
   }
 
