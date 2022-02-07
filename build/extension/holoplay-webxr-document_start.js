@@ -7156,6 +7156,13 @@ host this content on a secure origin for the best user experience.
                 }
 
                 const PRIVATE$j = Symbol('HoloPlayXRWebGLLayer');
+                const lkgCanvas = document.createElement('canvas');
+                lkgCanvas.tabIndex = 0;
+                const lkgCtx = lkgCanvas.getContext('2d', { alpha: false });
+                lkgCanvas.addEventListener('dblclick', function () {
+                  this.requestFullscreen();
+                });
+                const controls = makeControls(lkgCanvas);
                 class HoloPlayXRWebGLLayer extends XRWebGLLayer {
                   constructor(session, gl, layerInit) {
                     super(session, gl, layerInit);
@@ -7338,13 +7345,6 @@ host this content on a secure origin for the best user experience.
                       gl.clearStencil(currentClearStencil);
                     };
                     const appCanvas = gl.canvas;
-                    const lkgCanvas = document.createElement('canvas');
-                    lkgCanvas.tabIndex = 0;
-                    const ctx = lkgCanvas.getContext('2d', { alpha: false });
-                    lkgCanvas.addEventListener('dblclick', function () {
-                      this.requestFullscreen();
-                    });
-                    const controls = makeControls(() => popup, lkgCanvas);
                     let origWidth, origHeight;
                     const blitTextureToDefaultFramebufferIfNeeded = () => {
                       if (!this[PRIVATE$j].holoplayEnabled) return;
@@ -7381,8 +7381,8 @@ host this content on a secure origin for the best user experience.
                           gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
                           gl.uniform1i(u_viewType, 0);
                           gl.drawArrays(gl.TRIANGLES, 0, 6);
-                          ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-                          ctx.drawImage(appCanvas, 0, 0);
+                          lkgCtx.clearRect(0, 0, lkgCanvas.width, lkgCanvas.height);
+                          lkgCtx.drawImage(appCanvas, 0, 0);
                           if (cfg.inlineView !== 0) {
                             gl.uniform1i(u_viewType, cfg.inlineView);
                             gl.drawArrays(gl.TRIANGLES, 0, 6);
@@ -7455,7 +7455,7 @@ host this content on a secure origin for the best user experience.
                   }
                   return s;
                 }
-                function makeControls(getPopup, lkgCanvas) {
+                function makeControls(lkgCanvas) {
                   const cfg = getHoloPlayConfig();
                   const styleElement = document.createElement('style');
                   document.head.appendChild(styleElement);

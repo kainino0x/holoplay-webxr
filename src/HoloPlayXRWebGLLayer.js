@@ -19,6 +19,14 @@ import { getHoloPlayConfig } from './HoloPlayConfig';
 
 export const PRIVATE = Symbol('HoloPlayXRWebGLLayer');
 
+const lkgCanvas = document.createElement('canvas');
+lkgCanvas.tabIndex = 0;
+const lkgCtx = lkgCanvas.getContext('2d', { alpha: false });
+lkgCanvas.addEventListener('dblclick', function () {
+  this.requestFullscreen();
+});
+const controls = makeControls(lkgCanvas);
+
 export default class HoloPlayXRWebGLLayer extends XRWebGLLayer {
   constructor(session, gl, layerInit) {
     super(session, gl, layerInit);
@@ -238,15 +246,6 @@ export default class HoloPlayXRWebGLLayer extends XRWebGLLayer {
 
     const appCanvas = gl.canvas;
 
-    const lkgCanvas = document.createElement('canvas');
-    lkgCanvas.tabIndex = 0;
-    const ctx = lkgCanvas.getContext('2d', { alpha: false });
-    lkgCanvas.addEventListener('dblclick', function () {
-      this.requestFullscreen();
-    });
-
-    const controls = makeControls(() => popup, lkgCanvas);
-
     let origWidth, origHeight;
 
     const blitTextureToDefaultFramebufferIfNeeded = () => {
@@ -296,8 +295,8 @@ export default class HoloPlayXRWebGLLayer extends XRWebGLLayer {
           gl.drawArrays(gl.TRIANGLES, 0, 6);
 
           // Copy it into the canvas that's actually on the display
-          ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-          ctx.drawImage(appCanvas, 0, 0);
+          lkgCtx.clearRect(0, 0, lkgCanvas.width, lkgCanvas.height);
+          lkgCtx.drawImage(appCanvas, 0, 0);
 
           // And optionally render over with a "nicer" inline view
           if (cfg.inlineView !== 0) {
@@ -384,7 +383,7 @@ function glslifyNumbers(strings, ...values) {
   return s;
 }
 
-function makeControls(getPopup, lkgCanvas) {
+function makeControls(lkgCanvas) {
   const cfg = getHoloPlayConfig();
 
   const styleElement = document.createElement('style');
