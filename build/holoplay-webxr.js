@@ -7335,6 +7335,7 @@ host this content on a secure origin for the best user experience.
                     };
                     const appCanvas = gl.canvas;
                     const lkgCanvas = document.createElement('canvas');
+                    lkgCanvas.tabIndex = 0;
                     const ctx = lkgCanvas.getContext('2d', { alpha: false });
                     lkgCanvas.addEventListener('dblclick', function () {
                       this.requestFullscreen();
@@ -7486,7 +7487,7 @@ host this content on a secure origin for the best user experience.
                   help.style.width = '100%';
                   help.style.whiteSpace = 'normal';
                   help.style.textAlign = 'center';
-                  help.innerHTML = 'Camera: drag mouse left/right buttons and use scroll wheel inside the popup.';
+                  help.innerHTML = 'Camera: click popup and use WASD, mouse left/right drag, and scroll.';
                   const lrToggle = document.createElement('input');
                   title.appendChild(lrToggle);
                   lrToggle.type = 'button';
@@ -7681,6 +7682,40 @@ host this content on a secure origin for the best user experience.
                       setTrackballY(v => v - my * 0.01);
                     }
                   });
+                  const keys = { w: 0, a: 0, s: 0, d: 0 };
+                  lkgCanvas.addEventListener('keydown', ev => {
+                    switch (ev.code) {
+                      case 'KeyW': keys.w = 1; break;
+                      case 'KeyA': keys.a = 1; break;
+                      case 'KeyS': keys.s = 1; break;
+                      case 'KeyD': keys.d = 1; break;
+                    }
+                  });
+                  lkgCanvas.addEventListener('keyup', ev => {
+                    switch (ev.code) {
+                      case 'KeyW': keys.w = 0; break;
+                      case 'KeyA': keys.a = 0; break;
+                      case 'KeyS': keys.s = 0; break;
+                      case 'KeyD': keys.d = 0; break;
+                    }
+                  });
+                  requestAnimationFrame(flyCamera);
+                  function flyCamera() {
+                    let kx = keys.d - keys.a;
+                    let ky = keys.w - keys.s;
+                    if (kx && ky) {
+                      kx *= Math.sqrt(0.5);
+                      ky *= Math.sqrt(0.5);
+                    }
+                    const tx = cfg.trackballX, ty = cfg.trackballY;
+                    const dx =  Math.cos(tx) * kx - Math.sin(tx) * Math.cos(ty) * ky;
+                    const dy =                                    -Math.sin(ty) * ky;
+                    const dz = -Math.sin(tx) * kx - Math.cos(tx) * Math.cos(ty) * ky;
+                    setTargetX(v => v + dx * cfg.targetDiam * 0.03);
+                    setTargetY(v => v + dy * cfg.targetDiam * 0.03);
+                    setTargetZ(v => v + dz * cfg.targetDiam * 0.03);
+                    requestAnimationFrame(flyCamera);
+                  }
                   return c;
                 }
 
