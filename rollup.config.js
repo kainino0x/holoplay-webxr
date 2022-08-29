@@ -20,7 +20,7 @@ import resolve from 'rollup-plugin-node-resolve';
 import cleanup from 'rollup-plugin-cleanup';
 
 const cfg = {
-  input: 'src/HoloPlayWebXRPolyfill.js',
+  input: 'src/LookingGlassWebXRPolyfill.js',
   plugins: [
     replace({
       'process.env.NODE_ENV': JSON.stringify('production'),
@@ -38,7 +38,7 @@ export default [
   {
     ...cfg,
     output: {
-      file: './build/holoplay-webxr.js',
+      file: './build/LookingGlass-webxr.js',
       format: 'umd',
       name: 'HoloPlayWebXRPolyfill',
     },
@@ -47,7 +47,7 @@ export default [
   {
     ...cfg,
     output: {
-      file: './build/extension/holoplay-webxr-document_start.js',
+      file: './build/extension/lookingglass-webxr-document_start.js',
       format: 'umd',
       name: 'HoloPlayWebXRPolyfill',
       // Note: These banner and footer are the trick to inject polyfill at document_start
@@ -59,7 +59,7 @@ export default [
           };
           const script = document.createElement("script");
           script.textContent = '(' + fn.toString() +
-            ')(); new HoloPlayWebXRPolyfill("HoloPlay WebXR extension overriding native WebXR API. Disable extension to stop.");';
+            ')(); new LookingGlassWebXRPolyfill("LookingGlass WebXR extension overriding native WebXR API. Disable extension to stop.");';
           (document.head || document.documentElement).prepend(script);
           script.parentNode.removeChild(script);
         })();

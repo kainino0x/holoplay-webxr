@@ -1,11 +1,11 @@
 {
-  "name": "holoplay-webxr",
+  "name": "looking-glass-webxr",
   "version": "0.1.0",
   "license": "Apache-2.0",
   "private": true,
   "description": "Unofficial WebXR implementation for HoloPlay holographic displays, such as Looking Glass.",
-  "repository": "https://github.com/kainino0x/holoplay-webxr",
-  "main": "src/HoloPlayWebXRPolyfill.js",
+  "repository": "https://github.com/Looking-Glass/looking-glass-webxr",
+  "main": "src/LookingGlassWebXRPolyfill.js",
   "scripts": {
     "build": "rollup -c",
     "serve": "http-server -c-1"
