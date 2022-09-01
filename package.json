@@ -12,7 +12,7 @@
   "scripts": {
     "build": "rollup -c",
     "serve": "http-server -c-1",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"No test specified\""
   },
   "devDependencies": {
     "babel-core": "^7.0.0-bridge.0",
