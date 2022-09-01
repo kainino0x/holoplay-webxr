@@ -1,14 +1,18 @@
 {
-  "name": "looking-glass-webxr",
+  "name": "@lookingglass/webxr",
   "version": "0.1.0",
   "license": "Apache-2.0",
   "private": true,
   "description": "Unofficial WebXR implementation for HoloPlay holographic displays, such as Looking Glass.",
-  "repository": "https://github.com/Looking-Glass/looking-glass-webxr",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Looking-Glass/looking-glass-webxr.git"
+  },
   "main": "src/LookingGlassWebXRPolyfill.js",
   "scripts": {
     "build": "rollup -c",
-    "serve": "http-server -c-1"
+    "serve": "http-server -c-1",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "devDependencies": {
     "babel-core": "^7.0.0-bridge.0",
@@ -27,5 +31,16 @@
     "gl-matrix": "^2.8.1",
     "holoplay-core": "0.0.8",
     "webxr-polyfill": "file:./third_party/webxr-polyfill"
-  }
+  },
+  "bugs": {
+    "url": "https://github.com/Looking-Glass/looking-glass-webxr/issues"
+  },
+  "homepage": "https://github.com/Looking-Glass/looking-glass-webxr#readme",
+  "keywords": [
+    "hologram",
+    "3D",
+    "looking",
+    "glass"
+  ],
+  "author": "Looking Glass Factory"
 }
