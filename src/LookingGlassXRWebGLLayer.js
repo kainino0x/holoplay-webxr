@@ -342,7 +342,7 @@ export default class LookingGlassXRWebGLLayer extends XRWebGLLayer {
         document.body.appendChild(controls);
 
         popup = window.open('', undefined, 'width=640,height=360');
-        popup.document.title = 'LookingGlass Window (fullscreen me on Looking Glass!)';
+        popup.document.title = 'Looking Glass Window (fullscreen me on Looking Glass!)';
         popup.document.body.style.background = 'black';
         popup.document.body.appendChild(lkgCanvas);
         console.assert(onbeforeunload);

@@ -1,7 +1,11 @@
+
+        (() => {
+          const fn = () => {
+      
 (function (global, factory) {
                 typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
                 typeof define === 'function' && define.amd ? define(factory) :
-                (global = global || self, global.HoloPlayWebXRPolyfill = factory());
+                (global = global || self, global.LookingGlassWebXRPolyfill = factory());
 }(this, (function () { 'use strict';
 
                 const _global = typeof global !== 'undefined' ? global :
@@ -7046,7 +7050,7 @@ host this content on a secure origin for the best user experience.
 
                 const kDefaultEyeHeight = 1.6;
                 let config;
-                const getHoloPlayConfig = () => {
+                const getLookingGlassConfig = () => {
                   if (config === undefined) config = makeConfig();
                   return config;
                 };
@@ -7078,16 +7082,16 @@ host this content on a secure origin for the best user experience.
                     const client = new Client(
                       (msg) => {
                         if (msg.devices.length < 1) {
-                          console.error('No HoloPlay devices found!');
+                          console.error('No Looking Glass devices found!');
                           return;
                         }
                         if (msg.devices.length > 1) {
-                          console.warn('More than one HoloPlay device found... using the first one');
+                          console.warn('More than one Looking Glass device found... using the first one');
                         }
                         this.calibration = msg.devices[0].calibration;
                       },
                       (err) => {
-                        console.error('Error creating HoloPlay client:', err);
+                        console.error('Error creating Looking Glass client:', err);
                       });
                     this.tileHeight = 320;
                     this.numViews = 2;
@@ -7151,7 +7155,7 @@ host this content on a secure origin for the best user experience.
                   return o;
                 }
 
-                const PRIVATE$j = Symbol('HoloPlayXRWebGLLayer');
+                const PRIVATE$j = Symbol('LookingGlassXRWebGLLayer');
                 const lkgCanvas = document.createElement('canvas');
                 lkgCanvas.tabIndex = 0;
                 const lkgCtx = lkgCanvas.getContext('2d', { alpha: false });
@@ -7159,10 +7163,10 @@ host this content on a secure origin for the best user experience.
                   this.requestFullscreen();
                 });
                 const controls = makeControls(lkgCanvas);
-                class HoloPlayXRWebGLLayer extends XRWebGLLayer {
+                class LookingGlassXRWebGLLayer extends XRWebGLLayer {
                   constructor(session, gl, layerInit) {
                     super(session, gl, layerInit);
-                    const cfg = getHoloPlayConfig();
+                    const cfg = getLookingGlassConfig();
                     const config = this[PRIVATE$g].config;
                     const texture = gl.createTexture();
                     let depthStencil, dsConfig;
@@ -7327,7 +7331,7 @@ host this content on a secure origin for the best user experience.
                     glBindVertexArray(oldVAO);
                     gl.bindBuffer(gl.ARRAY_BUFFER, oldBufferBinding);
                     const clearFramebuffer = () => {
-                      console.assert(this[PRIVATE$j].holoplayEnabled);
+                      console.assert(this[PRIVATE$j].LookingGlassEnabled);
                       gl.bindFramebuffer(gl.FRAMEBUFFER, this.framebuffer);
                       const currentClearColor = gl.getParameter(gl.COLOR_CLEAR_VALUE);
                       const currentClearDepth = gl.getParameter(gl.DEPTH_CLEAR_VALUE);
@@ -7343,7 +7347,7 @@ host this content on a secure origin for the best user experience.
                     const appCanvas = gl.canvas;
                     let origWidth, origHeight;
                     const blitTextureToDefaultFramebufferIfNeeded = () => {
-                      if (!this[PRIVATE$j].holoplayEnabled) return;
+                      if (!this[PRIVATE$j].LookingGlassEnabled) return;
                       if (appCanvas.width !== cfg.calibration.screenW.value ||
                           appCanvas.height !== cfg.calibration.screenH.value) {
                         origWidth = appCanvas.width;
@@ -7416,7 +7420,7 @@ host this content on a secure origin for the best user experience.
                         lkgCanvas.height = cfg.calibration.screenH.value;
                         document.body.appendChild(controls);
                         popup = window.open('', undefined, 'width=640,height=360');
-                        popup.document.title = 'HoloPlay Window (fullscreen me on Looking Glass!)';
+                        popup.document.title = 'Looking Glass Window (fullscreen me on Looking Glass!)';
                         popup.document.body.style.background = 'black';
                         popup.document.body.appendChild(lkgCanvas);
                         console.assert(onbeforeunload);
@@ -7431,16 +7435,16 @@ host this content on a secure origin for the best user experience.
                       }
                     };
                     this[PRIVATE$j] = {
-                      holoplayEnabled: false,
+                      LookingGlassEnabled: false,
                       framebuffer,
                       clearFramebuffer,
                       blitTextureToDefaultFramebufferIfNeeded,
                       moveCanvasToWindow,
                     };
                   }
-                  get framebuffer() { return this[PRIVATE$j].holoplayEnabled ? this[PRIVATE$j].framebuffer : null; }
-                  get framebufferWidth() { return getHoloPlayConfig().framebufferWidth; }
-                  get framebufferHeight() { return getHoloPlayConfig().framebufferHeight; }
+                  get framebuffer() { return this[PRIVATE$j].LookingGlassEnabled ? this[PRIVATE$j].framebuffer : null; }
+                  get framebufferWidth() { return getLookingGlassConfig().framebufferWidth; }
+                  get framebufferHeight() { return getLookingGlassConfig().framebufferHeight; }
                 }
                 function glslifyNumbers(strings, ...values) {
                   let s = strings[0];
@@ -7452,13 +7456,13 @@ host this content on a secure origin for the best user experience.
                   return s;
                 }
                 function makeControls(lkgCanvas) {
-                  const cfg = getHoloPlayConfig();
+                  const cfg = getLookingGlassConfig();
                   const styleElement = document.createElement('style');
                   document.head.appendChild(styleElement);
                   styleElement.sheet.insertRule(
-                    '#HoloPlayWebXRControls * { all: revert; font-family: sans-serif }');
+                    '#LookingGlassWebXRControls * { all: revert; font-family: sans-serif }');
                   const c = document.createElement('div');
-                  c.id = 'HoloPlayWebXRControls';
+                  c.id = 'LookingGlassWebXRControls';
                   c.style.position = 'fixed';
                   c.style.zIndex = 1000;
                   c.style.padding = '4px';
@@ -7481,7 +7485,7 @@ host this content on a secure origin for the best user experience.
                   title.style.width = '100%';
                   title.style.textAlign = 'center';
                   title.style.fontWeight = 'bold';
-                  title.innerText = 'HoloPlay View Controls ';
+                  title.innerText = 'LookingGlass View Controls ';
                   const help = document.createElement('div');
                   c.appendChild(help);
                   help.style.width = '100%';
@@ -7719,7 +7723,7 @@ host this content on a secure origin for the best user experience.
                   return c;
                 }
 
-                class HoloPlayXRDevice extends XRDevice {
+                class LookingGlassXRDevice extends XRDevice {
                   constructor(global) {
                     super(global);
                     this.sessions = new Map();
@@ -7727,14 +7731,14 @@ host this content on a secure origin for the best user experience.
                     this.basePoseMatrix = create$6();
                     this.inlineProjectionMatrix = create$6();
                     this.inlineInverseViewMatrix = create$6();
-                    this.holoplayProjectionMatrices = [];
-                    this.holoplayInverseViewMatrices = [];
+                    this.LookingGlassProjectionMatrices = [];
+                    this.LookingGlassInverseViewMatrices = [];
                   }
                   onBaseLayerSet(sessionId, layer) {
                     const session = this.sessions.get(sessionId);
                     session.baseLayer = layer;
                     const baseLayerPrivate = layer[PRIVATE$j];
-                    baseLayerPrivate.holoplayEnabled = session.immersive;
+                    baseLayerPrivate.LookingGlassEnabled = session.immersive;
                     if (session.immersive) {
                       baseLayerPrivate.moveCanvasToWindow(true, () => {
                         this.endSession(sessionId);
@@ -7752,7 +7756,7 @@ host this content on a secure origin for the best user experience.
                       case 'bounded-floor': return false;
                       case 'unbounded': return false;
                       default:
-                        console.warn('HoloPlayXRDevice.isFeatureSupported: feature not understood:', featureDescriptor);
+                        console.warn('LookingGlassXRDevice.isFeatureSupported: feature not understood:', featureDescriptor);
                         return false;
                     }
                   }
@@ -7776,7 +7780,7 @@ host this content on a secure origin for the best user experience.
                   }
                   onFrameStart(sessionId, renderState) {
                     const session = this.sessions.get(sessionId);
-                    const cfg = getHoloPlayConfig();
+                    const cfg = getLookingGlassConfig();
                     if (session.immersive) {
                       const tanHalfFovy = Math.tan(0.5 * cfg.fovy);
                       const focalDistance = 0.5 * cfg.targetDiam / tanHalfFovy;
@@ -7790,7 +7794,7 @@ host this content on a secure origin for the best user experience.
                         const fractionAlongViewCone = (i + 0.5) / cfg.numViews - 0.5;
                         const tanAngleToThisCamera = Math.tan(cfg.viewCone * fractionAlongViewCone);
                         const offsetAlongBaseline = focalDistance * tanAngleToThisCamera;
-                        const mView = (this.holoplayInverseViewMatrices[i] = this.holoplayInverseViewMatrices[i] || create$6());
+                        const mView = (this.LookingGlassInverseViewMatrices[i] = this.LookingGlassInverseViewMatrices[i] || create$6());
                         translate(mView, mPose, [offsetAlongBaseline, 0, 0]);
                         invert$2(mView, mView);
                         const n = Math.max(clipPlaneBias + renderState.depthNear, 0.01);
@@ -7800,7 +7804,7 @@ host this content on a secure origin for the best user experience.
                         const midpointX = n * -tanAngleToThisCamera;
                         const halfXRange = cfg.aspect * halfYRange;
                         const r = midpointX + halfXRange, l = midpointX - halfXRange;
-                        const mProj = (this.holoplayProjectionMatrices[i] = this.holoplayProjectionMatrices[i] || create$6());
+                        const mProj = (this.LookingGlassProjectionMatrices[i] = this.LookingGlassProjectionMatrices[i] || create$6());
                         set(mProj,
                           2 * n / (r - l), 0, 0, 0,
                           0, 2 * n / (t - b), 0, 0,
@@ -7852,9 +7856,9 @@ host this content on a secure origin for the best user experience.
                   }
                   getViewSpaces(mode) {
                     if (mode === 'immersive-vr') {
-                      const cfg = getHoloPlayConfig();
+                      const cfg = getLookingGlassConfig();
                       for (let i = this.viewSpaces.length; i < cfg.numViews; ++i) {
-                        this.viewSpaces[i] = new HoloPlayXRSpace(i);
+                        this.viewSpaces[i] = new LookingGlassXRSpace(i);
                       }
                       this.viewSpaces.length = cfg.numViews;
                       return this.viewSpaces;
@@ -7870,7 +7874,7 @@ host this content on a secure origin for the best user experience.
                       target.width = gl.drawingBufferWidth;
                       target.height = gl.drawingBufferHeight;
                     } else {
-                      const cfg = getHoloPlayConfig();
+                      const cfg = getLookingGlassConfig();
                       const col = viewIndex % cfg.quiltWidth;
                       const row = Math.floor(viewIndex / cfg.quiltWidth);
                       target.x = cfg.tileWidth * col;
@@ -7882,7 +7886,7 @@ host this content on a secure origin for the best user experience.
                   }
                   getProjectionMatrix(eye, viewIndex) {
                     if (viewIndex === undefined) { return this.inlineProjectionMatrix; }
-                    return this.holoplayProjectionMatrices[viewIndex] || create$6();
+                    return this.LookingGlassProjectionMatrices[viewIndex] || create$6();
                   }
                   getBasePoseMatrix() {
                     return this.basePoseMatrix;
@@ -7891,7 +7895,7 @@ host this content on a secure origin for the best user experience.
                     return this.inlineInverseViewMatrix;
                   }
                   _getViewMatrixByIndex(viewIndex) {
-                    return (this.holoplayInverseViewMatrices[viewIndex] = this.holoplayInverseViewMatrices[viewIndex] || create$6());
+                    return (this.LookingGlassInverseViewMatrices[viewIndex] = this.LookingGlassInverseViewMatrices[viewIndex] || create$6());
                   }
                   getInputSources() { return []; }
                   getInputPose(inputSource, coordinateSystem, poseType) { return null; }
@@ -7908,7 +7912,7 @@ host this content on a secure origin for the best user experience.
                     this.enabledFeatures = enabledFeatures;
                   }
                 }
-                class HoloPlayXRSpace extends XRSpace {
+                class LookingGlassXRSpace extends XRSpace {
                   constructor(viewIndex) {
                     super();
                     this.viewIndex = viewIndex;
@@ -7919,16 +7923,16 @@ host this content on a secure origin for the best user experience.
                   }
                 }
 
-                class HoloPlayWebXRPolyfill extends WebXRPolyfill {
+                class LookingGlassWebXRPolyfill extends WebXRPolyfill {
                   constructor(message) {
                     super();
-                    console.warn(message || 'HoloPlay WebXR "polyfill" overriding native WebXR API.');
+                    console.warn(message || 'Looking Glass WebXR "polyfill" overriding native WebXR API.');
                     for (const className in API) {
                       this.global[className] = API[className];
                     }
-                    this.global.XRWebGLLayer = HoloPlayXRWebGLLayer;
+                    this.global.XRWebGLLayer = LookingGlassXRWebGLLayer;
                     this.injected = true;
-                    const devicePromise = Promise.resolve(new HoloPlayXRDevice(this.global));
+                    const devicePromise = Promise.resolve(new LookingGlassXRDevice(this.global));
                     this.xr = new XRSystem(devicePromise);
                     Object.defineProperty(this.global.navigator, 'xr', {
                       value: this.xr,
@@ -7937,6 +7941,15 @@ host this content on a secure origin for the best user experience.
                   }
                 }
 
-                return HoloPlayWebXRPolyfill;
+                return LookingGlassWebXRPolyfill;
 
 })));
+
+          };
+          const script = document.createElement("script");
+          script.textContent = '(' + fn.toString() +
+            ')(); new LookingGlassWebXRPolyfill("LookingGlass WebXR extension overriding native WebXR API. Disable extension to stop.");';
+          (document.head || document.documentElement).prepend(script);
+          script.parentNode.removeChild(script);
+        })();
+      

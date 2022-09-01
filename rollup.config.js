@@ -38,18 +38,18 @@ export default [
   {
     ...cfg,
     output: {
-      file: './build/LookingGlass-webxr.js',
+      file: './build/looking-glass-webxr.js',
       format: 'umd',
-      name: 'HoloPlayWebXRPolyfill',
+      name: 'LookingGlassWebXRPolyfill',
     },
   },
   // Build as a WebExtension
   {
     ...cfg,
     output: {
-      file: './build/extension/lookingglass-webxr-document_start.js',
+      file: './build/extension/looking-glass-webxr-document_start.js',
       format: 'umd',
-      name: 'HoloPlayWebXRPolyfill',
+      name: 'LookingGlassWebXRPolyfill',
       // Note: These banner and footer are the trick to inject polyfill at document_start
       banner: `
         (() => {
