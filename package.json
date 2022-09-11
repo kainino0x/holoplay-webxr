@@ -30,7 +30,7 @@
   "dependencies": {
     "gl-matrix": "^2.8.1",
     "holoplay-core": "0.0.8",
-    "webxr-polyfill": "file:./third_party/webxr-polyfill"
+    "webxr-polyfill": "@lookingglass/webxr-polyfill"
   },
   "bugs": {
     "url": "https://github.com/Looking-Glass/looking-glass-webxr/issues"
