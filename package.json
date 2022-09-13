@@ -1,6 +1,6 @@
 {
   "name": "@lookingglass/webxr",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "license": "Apache-2.0",
   "private": false,
   "description": "Unofficial WebXR implementation for HoloPlay holographic displays, such as Looking Glass.",
@@ -30,7 +30,7 @@
   "dependencies": {
     "gl-matrix": "^2.8.1",
     "holoplay-core": "0.0.8",
-    "webxr-polyfill": "@lookingglass/webxr-polyfill"
+    "@lookingglass/webxr-polyfill": "0.1.0"
   },
   "bugs": {
     "url": "https://github.com/Looking-Glass/looking-glass-webxr/issues"
