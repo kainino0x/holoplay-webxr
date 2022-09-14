@@ -3,8 +3,8 @@
           const fn = () => {
       
 (function (global, factory) {
-  typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('@lookingglass/webxr-polyfill'), require('webxr-polyfill/src/api/XRSystem'), require('webxr-polyfill/src/api/index'), require('webxr-polyfill/src/devices/XRDevice'), require('webxr-polyfill/src/api/XRSpace'), require('webxr-polyfill/src/api/XRWebGLLayer')) :
-  typeof define === 'function' && define.amd ? define(['@lookingglass/webxr-polyfill', 'webxr-polyfill/src/api/XRSystem', 'webxr-polyfill/src/api/index', 'webxr-polyfill/src/devices/XRDevice', 'webxr-polyfill/src/api/XRSpace', 'webxr-polyfill/src/api/XRWebGLLayer'], factory) :
+  typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('@lookingglass/webxr-polyfill'), require('@lookingglass/webxr-polyfill/src/api/XRSystem'), require('@lookingglass/webxr-polyfill/src/api/index'), require('webxr-polyfill/src/devices/XRDevice'), require('webxr-polyfill/src/api/XRSpace'), require('webxr-polyfill/src/api/XRWebGLLayer')) :
+  typeof define === 'function' && define.amd ? define(['@lookingglass/webxr-polyfill', '@lookingglass/webxr-polyfill/src/api/XRSystem', '@lookingglass/webxr-polyfill/src/api/index', 'webxr-polyfill/src/devices/XRDevice', 'webxr-polyfill/src/api/XRSpace', 'webxr-polyfill/src/api/XRWebGLLayer'], factory) :
   (global = global || self, global.LookingGlassWebXRPolyfill = factory(global.WebXRPolyfill, global.XRSystem, global.API, global.XRDevice, global.XRSpace, global.XRWebGLLayer));
 }(this, (function (WebXRPolyfill, XRSystem, API, XRDevice, XRSpace, XRWebGLLayer) { 'use strict';
 
