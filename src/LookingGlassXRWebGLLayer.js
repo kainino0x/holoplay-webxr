@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import XRWebGLLayer, { PRIVATE as XRWebGLLayer_PRIVATE } from 'webxr-polyfill/src/api/XRWebGLLayer';
+import XRWebGLLayer, { PRIVATE as XRWebGLLayer_PRIVATE } from '@lookingglass/webxr-polyfill/src/api/XRWebGLLayer';
 import { getLookingGlassConfig } from './LookingGlassConfig';
 
 export const PRIVATE = Symbol('LookingGlassXRWebGLLayer');

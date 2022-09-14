@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import XRDevice from 'webxr-polyfill/src/devices/XRDevice';
-import XRSpace from 'webxr-polyfill/src/api/XRSpace'
+import XRDevice from '@lookingglass/webxr-polyfill/src/devices/XRDevice';
+import XRSpace from '@lookingglass/webxr-polyfill/src/api/XRSpace'
 import { vec3, quat, mat4 } from 'gl-matrix';
 import { PRIVATE as LookingGlassXRWebGLLayer_PRIVATE } from './LookingGlassXRWebGLLayer';
 import { getLookingGlassConfig, kDefaultEyeHeight } from './LookingGlassConfig';

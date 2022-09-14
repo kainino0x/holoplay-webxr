@@ -1,6 +1,6 @@
 {
   "name": "@lookingglass/webxr",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "license": "Apache-2.0",
   "private": false,
   "description": "Unofficial WebXR implementation for HoloPlay holographic displays, such as Looking Glass.",
