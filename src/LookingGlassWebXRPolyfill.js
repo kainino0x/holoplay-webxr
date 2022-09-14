@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import WebXRPolyfill from 'webxr-polyfill/src/WebXRPolyfill';
-import XRSystem from 'webxr-polyfill/src/api/XRSystem';
-import API from 'webxr-polyfill/src/api/index';
+import WebXRPolyfill from '@lookingglass/webxr-polyfill';
+import XRSystem from '@lookingglass/webxr-polyfill/src/api/XRSystem';
+import API from '@lookingglass/webxr-polyfill/src/api/index';
 import LookingGlassXRDevice from './LookingGlassXRDevice';
 import LookingGlassXRWebGLLayer from './LookingGlassXRWebGLLayer';
 
