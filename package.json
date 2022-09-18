@@ -1,6 +1,16 @@
 {
   "name": "@lookingglass/webxr",
-  "version": "0.1.5",
+  "type": "module",
+  "files": ["dist"],
+  "main": "./dist/looking-glass-webxr.umd.cjs",
+  "module": "./dist/looking-glass-webxr.js",
+  "exports":{
+    ".": {
+      "import": "./dist/@lookingglass/webxr.js",
+      "require": "./dist/@lookingglass/webxr.umd.cjs"
+    }
+  },
+  "version": "0.1.6",
   "license": "Apache-2.0",
   "private": false,
   "description": "Unofficial WebXR implementation for HoloPlay holographic displays, such as Looking Glass.",
@@ -8,29 +18,16 @@
     "type": "git",
     "url": "git+https://github.com/Looking-Glass/looking-glass-webxr.git"
   },
-  "main": "src/LookingGlassWebXRPolyfill.js",
   "scripts": {
-    "build": "rollup -c",
-    "serve": "http-server -c-1",
-    "test": "echo \"No test specified\""
+    "build": "vite build"
   },
   "devDependencies": {
-    "babel-core": "^7.0.0-bridge.0",
-    "babel-loader": "^8.0.6",
-    "babel-preset-env": "^1.7.0",
-    "rollup": "^1.26.3",
-    "rollup-plugin-babel": "^4.3.3",
-    "rollup-plugin-cleanup": "^1.0.1",
-    "rollup-plugin-commonjs": "^8.3.0",
-    "rollup-plugin-node-resolve": "^3.1.1",
-    "rollup-plugin-replace": "^2.2.0",
-    "rollup-plugin-uglify": "^6.0.3",
-    "http-server": "^0.12.3"
+    "vite": "^3.1.2"
   },
   "dependencies": {
+    "@lookingglass/webxr-polyfill": "0.1.1",
     "gl-matrix": "^2.8.1",
-    "holoplay-core": "0.0.8",
-    "@lookingglass/webxr-polyfill": "0.1.0"
+    "holoplay-core": "0.0.9"
   },
   "bugs": {
     "url": "https://github.com/Looking-Glass/looking-glass-webxr/issues"
