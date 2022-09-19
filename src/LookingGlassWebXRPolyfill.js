@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-import WebXRPolyfill from '@lookingglass/webxr-polyfill';
+import WebXRPolyfill from '@lookingglass/webxr-polyfill/src/WebXRPolyfill';
 import XRSystem from '@lookingglass/webxr-polyfill/src/api/XRSystem';
 import API from '@lookingglass/webxr-polyfill/src/api/index';
 import LookingGlassXRDevice from './LookingGlassXRDevice';
 import LookingGlassXRWebGLLayer from './LookingGlassXRWebGLLayer';
+import getLookingGlassConfig from './LookingGlassConfig';
 
-export default class LookingGlassWebXRPolyfill extends WebXRPolyfill {
+export class LookingGlassWebXRPolyfill extends WebXRPolyfill {
   constructor(message) {
     super();
 
@@ -40,3 +41,5 @@ export default class LookingGlassWebXRPolyfill extends WebXRPolyfill {
     });
   }
 }
+
+export const LookingGlassConfig = getLookingGlassConfig()

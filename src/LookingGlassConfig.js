@@ -19,7 +19,7 @@ import * as HoloPlayCore from 'holoplay-core/dist/holoplaycore.module.js';
 export const kDefaultEyeHeight = 1.6;
 
 let config;
-export const getLookingGlassConfig = () => {
+export default function getLookingGlassConfig() {
   if (config === undefined) config = makeConfig();
   return config;
 };

@@ -15,7 +15,7 @@
  */
 
  import XRWebGLLayer, { PRIVATE as XRWebGLLayer_PRIVATE } from '@lookingglass/webxr-polyfill/src/api/XRWebGLLayer';
- import { getLookingGlassConfig } from './LookingGlassConfig';
+ import getLookingGlassConfig from './LookingGlassConfig';
  import { makeControls } from './LookingGlassControls';
  import { Shader } from 'holoplay-core';
  

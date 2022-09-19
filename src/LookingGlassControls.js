@@ -1,4 +1,4 @@
-import { getLookingGlassConfig } from './LookingGlassConfig';
+import getLookingGlassConfig from './LookingGlassConfig';
 
 //lkgCanvas is defined in LookingGlassXRWebGLLayer.js, it is required when calling this function
 export function makeControls(lkgCanvas) {
