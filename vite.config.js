@@ -4,7 +4,7 @@ import { defineConfig } from 'vite'
 
 export default defineConfig({
   build: {
-    minify: false,
+    minify: true,
     lib: {
       entry: resolve(__dirname, 'src/LookingGlassWebXRPolyfill.js'),
       name: 'Looking Glass WebXR',
