@@ -45,7 +45,7 @@ const de = {
       (i) => {
         console.error("Error creating Looking Glass client:", i);
       }
-    ), this.tileHeight = 320, this.numViews = 2, this.trackballX = 0, this.trackballY = 0, this.targetX = 0, this.targetY = W, this.targetZ = -0.5, this.targetDiam = 2, this.fovy = 13 / 180 * Math.PI, this.depthiness = 1.25, this.inlineView = 1;
+    ), this.tileHeight = 512, this.numViews = 45, this.trackballX = 0, this.trackballY = 0, this.targetX = 0, this.targetY = W, this.targetZ = -0.5, this.targetDiam = 2, this.fovy = 13 / 180 * Math.PI, this.depthiness = 1.25, this.inlineView = 1;
   }
   get calibration() {
     return this._calibration;

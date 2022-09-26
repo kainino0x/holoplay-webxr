@@ -70,8 +70,8 @@ const makeConfig = () => new class extends EventTarget {
       });
 
     // Set defaults for configurable things
-    this.tileHeight = 320;
-    this.numViews = 2;
+    this.tileHeight = 512;
+    this.numViews = 45;
     this.trackballX = 0;
     this.trackballY = 0;
     this.targetX = 0;
