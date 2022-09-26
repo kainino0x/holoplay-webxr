@@ -14,25 +14,26 @@
  * limitations under the License.
  */
 
-import WebXRPolyfill from 'webxr-polyfill/src/WebXRPolyfill';
-import XRSystem from 'webxr-polyfill/src/api/XRSystem';
-import API from 'webxr-polyfill/src/api/index';
-import HoloPlayXRDevice from './HoloPlayXRDevice';
-import HoloPlayXRWebGLLayer from './HoloPlayXRWebGLLayer';
+import WebXRPolyfill from '@lookingglass/webxr-polyfill/src/WebXRPolyfill';
+import XRSystem from '@lookingglass/webxr-polyfill/src/api/XRSystem';
+import API from '@lookingglass/webxr-polyfill/src/api/index';
+import LookingGlassXRDevice from './LookingGlassXRDevice';
+import LookingGlassXRWebGLLayer from './LookingGlassXRWebGLLayer';
+import getLookingGlassConfig from './LookingGlassConfig';
 
-export default class HoloPlayWebXRPolyfill extends WebXRPolyfill {
+export class LookingGlassWebXRPolyfill extends WebXRPolyfill {
   constructor(message) {
     super();
 
-    console.warn(message || 'HoloPlay WebXR "polyfill" overriding native WebXR API.');
+    console.warn(message || 'Looking Glass WebXR "polyfill" overriding native WebXR API.');
     for (const className in API) {
       this.global[className] = API[className];
     }
-    this.global.XRWebGLLayer = HoloPlayXRWebGLLayer;
+    this.global.XRWebGLLayer = LookingGlassXRWebGLLayer;
 
     this.injected = true;
 
-    const devicePromise = Promise.resolve(new HoloPlayXRDevice(this.global));
+    const devicePromise = Promise.resolve(new LookingGlassXRDevice(this.global));
     this.xr = new XRSystem(devicePromise);
     Object.defineProperty(this.global.navigator, 'xr', {
       value: this.xr,
@@ -40,3 +41,5 @@ export default class HoloPlayWebXRPolyfill extends WebXRPolyfill {
     });
   }
 }
+
+export const LookingGlassConfig = getLookingGlassConfig()

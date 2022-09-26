@@ -19,7 +19,7 @@ import * as HoloPlayCore from 'holoplay-core/dist/holoplaycore.module.js';
 export const kDefaultEyeHeight = 1.6;
 
 let config;
-export const getHoloPlayConfig = () => {
+export default function getLookingGlassConfig() {
   if (config === undefined) config = makeConfig();
   return config;
 };
@@ -51,27 +51,27 @@ const makeConfig = () => new class extends EventTarget {
     };
     fireChanged(false);
 
-    // Placeholder values while we wait for the HoloPlay service.
+    // Placeholder values while we wait for the Looking Glass Bridge.
     this.calibration = kFakeCalibration;
 
     const client = new HoloPlayCore.Client(
       (msg) => {
         if (msg.devices.length < 1) {
-          console.error('No HoloPlay devices found!');
+          console.error('No Looking Glass devices found!');
           return;
         }
         if (msg.devices.length > 1) {
-          console.warn('More than one HoloPlay device found... using the first one');
+          console.warn('More than one Looking Glass device found... using the first one');
         }
         this.calibration = msg.devices[0].calibration;
       },
       (err) => {
-        console.error('Error creating HoloPlay client:', err);
+        console.error('Error creating Looking Glass client:', err);
       });
 
     // Set defaults for configurable things
-    this.tileHeight = 320;
-    this.numViews = 2;
+    this.tileHeight = 512;
+    this.numViews = 45;
     this.trackballX = 0;
     this.trackballY = 0;
     this.targetX = 0;

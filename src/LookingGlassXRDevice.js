@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import XRDevice from 'webxr-polyfill/src/devices/XRDevice';
-import XRSpace from 'webxr-polyfill/src/api/XRSpace'
-import { vec3, quat, mat4 } from 'gl-matrix';
-import { PRIVATE as HoloPlayXRWebGLLayer_PRIVATE } from './HoloPlayXRWebGLLayer';
-import { getHoloPlayConfig, kDefaultEyeHeight } from './HoloPlayConfig';
+import XRDevice from '@lookingglass/webxr-polyfill/src/devices/XRDevice';
+import XRSpace from '@lookingglass/webxr-polyfill/src/api/XRSpace'
+import { mat4 } from 'gl-matrix';
+import { PRIVATE as LookingGlassXRWebGLLayer_PRIVATE } from './LookingGlassXRWebGLLayer';
+import getLookingGlassConfig, { kDefaultEyeHeight } from './LookingGlassConfig';
 
-export default class HoloPlayXRDevice extends XRDevice {
+export default class LookingGlassXRDevice extends XRDevice {
   constructor(global) {
     super(global);
 
@@ -30,16 +30,16 @@ export default class HoloPlayXRDevice extends XRDevice {
     this.basePoseMatrix = mat4.create();
     this.inlineProjectionMatrix = mat4.create();
     this.inlineInverseViewMatrix = mat4.create();
-    this.holoplayProjectionMatrices = [];
-    this.holoplayInverseViewMatrices = [];
+    this.LookingGlassProjectionMatrices = [];
+    this.LookingGlassInverseViewMatrices = [];
   }
 
   onBaseLayerSet(sessionId, layer) {
     const session = this.sessions.get(sessionId);
     session.baseLayer = layer;
 
-    const baseLayerPrivate = layer[HoloPlayXRWebGLLayer_PRIVATE];
-    baseLayerPrivate.holoplayEnabled = session.immersive;
+    const baseLayerPrivate = layer[LookingGlassXRWebGLLayer_PRIVATE];
+    baseLayerPrivate.LookingGlassEnabled = session.immersive;
     if (session.immersive) {
       baseLayerPrivate.moveCanvasToWindow(true, () => {
         this.endSession(sessionId);
@@ -59,7 +59,7 @@ export default class HoloPlayXRDevice extends XRDevice {
       case 'bounded-floor': return false;
       case 'unbounded': return false;
       default:
-        console.warn('HoloPlayXRDevice.isFeatureSupported: feature not understood:', featureDescriptor);
+        console.warn('LookingGlassXRDevice.isFeatureSupported: feature not understood:', featureDescriptor);
         return false;
     }
   }
@@ -87,7 +87,7 @@ export default class HoloPlayXRDevice extends XRDevice {
 
   onFrameStart(sessionId, renderState) {
     const session = this.sessions.get(sessionId);
-    const cfg = getHoloPlayConfig();
+    const cfg = getLookingGlassConfig();
 
     if (session.immersive) {
       const tanHalfFovy = Math.tan(0.5 * cfg.fovy);
@@ -106,7 +106,7 @@ export default class HoloPlayXRDevice extends XRDevice {
         const tanAngleToThisCamera = Math.tan(cfg.viewCone * fractionAlongViewCone);
         const offsetAlongBaseline = focalDistance * tanAngleToThisCamera;
 
-        const mView = (this.holoplayInverseViewMatrices[i] = this.holoplayInverseViewMatrices[i] || mat4.create());
+        const mView = (this.LookingGlassInverseViewMatrices[i] = this.LookingGlassInverseViewMatrices[i] || mat4.create());
         mat4.translate(mView, mPose, [offsetAlongBaseline, 0, 0]);
         mat4.invert(mView, mView);
 
@@ -119,7 +119,7 @@ export default class HoloPlayXRDevice extends XRDevice {
         const midpointX = n * -tanAngleToThisCamera;
         const halfXRange = cfg.aspect * halfYRange;
         const r = midpointX + halfXRange, l = midpointX - halfXRange;
-        const mProj = (this.holoplayProjectionMatrices[i] = this.holoplayProjectionMatrices[i] || mat4.create());
+        const mProj = (this.LookingGlassProjectionMatrices[i] = this.LookingGlassProjectionMatrices[i] || mat4.create());
         mat4.set(mProj,
           2 * n / (r - l), 0, 0, 0,
           0, 2 * n / (t - b), 0, 0,
@@ -127,7 +127,7 @@ export default class HoloPlayXRDevice extends XRDevice {
           0, 0, -2 * f * n / (f - n), 0);
       }
 
-      const baseLayerPrivate = session.baseLayer[HoloPlayXRWebGLLayer_PRIVATE];
+      const baseLayerPrivate = session.baseLayer[LookingGlassXRWebGLLayer_PRIVATE];
       baseLayerPrivate.clearFramebuffer();
     } else {
       const gl = session.baseLayer.context;
@@ -145,7 +145,7 @@ export default class HoloPlayXRDevice extends XRDevice {
 
   onFrameEnd(sessionId) {
     const session = this.sessions.get(sessionId);
-    session.baseLayer[HoloPlayXRWebGLLayer_PRIVATE].blitTextureToDefaultFramebufferIfNeeded();
+    session.baseLayer[LookingGlassXRWebGLLayer_PRIVATE].blitTextureToDefaultFramebufferIfNeeded();
   }
 
   async requestFrameOfReferenceTransform(type, options) {
@@ -165,7 +165,7 @@ export default class HoloPlayXRDevice extends XRDevice {
   endSession(sessionId) {
     const session = this.sessions.get(sessionId);
     if (session.immersive && session.baseLayer) {
-      session.baseLayer[HoloPlayXRWebGLLayer_PRIVATE].moveCanvasToWindow(false);
+      session.baseLayer[LookingGlassXRWebGLLayer_PRIVATE].moveCanvasToWindow(false);
       this.dispatchEvent('@@webxr-polyfill/vr-present-end', sessionId);
     }
     session.ended = true;
@@ -181,11 +181,11 @@ export default class HoloPlayXRDevice extends XRDevice {
 
   getViewSpaces(mode) {
     if (mode === 'immersive-vr') {
-      const cfg = getHoloPlayConfig();
+      const cfg = getLookingGlassConfig();
 
       // Fill up viewSpaces to the necessary size if it's too short.
       for (let i = this.viewSpaces.length; i < cfg.numViews; ++i) {
-        this.viewSpaces[i] = new HoloPlayXRSpace(i);
+        this.viewSpaces[i] = new LookingGlassXRSpace(i);
       }
       // And trim it down if it's too long.
       this.viewSpaces.length = cfg.numViews;
@@ -205,7 +205,7 @@ export default class HoloPlayXRDevice extends XRDevice {
       target.width = gl.drawingBufferWidth;
       target.height = gl.drawingBufferHeight;
     } else {
-      const cfg = getHoloPlayConfig();
+      const cfg = getLookingGlassConfig();
       const col = viewIndex % cfg.quiltWidth;
       const row = Math.floor(viewIndex / cfg.quiltWidth);
 
@@ -219,7 +219,7 @@ export default class HoloPlayXRDevice extends XRDevice {
 
   getProjectionMatrix(eye, viewIndex) {
     if (viewIndex === undefined) { return this.inlineProjectionMatrix; }
-    return this.holoplayProjectionMatrices[viewIndex] || mat4.create();
+    return this.LookingGlassProjectionMatrices[viewIndex] || mat4.create();
   }
 
   getBasePoseMatrix() {
@@ -232,7 +232,7 @@ export default class HoloPlayXRDevice extends XRDevice {
   }
 
   _getViewMatrixByIndex(viewIndex) {
-    return (this.holoplayInverseViewMatrices[viewIndex] = this.holoplayInverseViewMatrices[viewIndex] || mat4.create());
+    return (this.LookingGlassInverseViewMatrices[viewIndex] = this.LookingGlassInverseViewMatrices[viewIndex] || mat4.create());
   }
 
   getInputSources() { return []; }
@@ -255,7 +255,7 @@ class Session {
   }
 }
 
-class HoloPlayXRSpace extends XRSpace {
+class LookingGlassXRSpace extends XRSpace {
   constructor(viewIndex) {
     super();
     this.viewIndex = viewIndex;
