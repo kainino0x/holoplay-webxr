@@ -231,12 +231,11 @@ export function makeControls(lkgCanvas) {
     lkgCanvas.oncontextmenu = ev => { ev.preventDefault() };
   
     lkgCanvas.addEventListener('wheel', ev => {
-      setTargetDiam(old => {
+        const old = cfg.targetDiam
         const GAMMA = 1.1;
         const logOld = Math.log(old) / Math.log(GAMMA);
-        return Math.pow(GAMMA, logOld + ev.deltaY * 0.01);
+        return cfg.targetDiam = Math.pow(GAMMA, logOld + ev.deltaY * 0.01);
       });
-    });
   
     lkgCanvas.addEventListener('mousemove', ev => {
       const mx = ev.movementX, my = -ev.movementY;
