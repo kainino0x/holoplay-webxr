@@ -10,7 +10,7 @@
       "require": "./dist/@lookingglass/webxr.umd.cjs"
     }
   },
-  "version": "0.1.8",
+  "version": "0.2.0",
   "license": "Apache-2.0",
   "private": false,
   "description": "Unofficial WebXR implementation for HoloPlay holographic displays, such as Looking Glass.",

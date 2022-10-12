@@ -20,18 +20,19 @@
  import { Shader } from 'holoplay-core';
  
  export const PRIVATE = Symbol('LookingGlassXRWebGLLayer');
- 
- const lkgCanvas = document.createElement('canvas');
- lkgCanvas.tabIndex = 0;
- const lkgCtx = lkgCanvas.getContext('2d', { alpha: false });
- lkgCanvas.addEventListener('dblclick', function () {
-   this.requestFullscreen();
- });
- const controls = makeControls(lkgCanvas);
+
  
  export default class LookingGlassXRWebGLLayer extends XRWebGLLayer {
    constructor(session, gl, layerInit) {
      super(session, gl, layerInit);
+
+     const lkgCanvas = document.createElement('canvas');
+     lkgCanvas.tabIndex = 0;
+     const lkgCtx = lkgCanvas.getContext('2d', { alpha: false });
+     lkgCanvas.addEventListener('dblclick', function () {
+       this.requestFullscreen();
+     });
+     const controls = makeControls(lkgCanvas);
  
      const cfg = getLookingGlassConfig();
  
