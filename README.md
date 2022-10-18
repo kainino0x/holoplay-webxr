@@ -1,4 +1,4 @@
-# WebXR for Looking Glass
+# Looking Glass WebXR Library
 
 This library implements the WebXR API (using [webxr-polyfill](https://github.com/immersive-web/webxr-polyfill))
 for [Looking Glass Factory](https://lookingglassfactory.com/)'s Looking Glass displays. Using this allows you to bring your three.js or babylon.js scenes into the Looking Glass without having to modify either library, enabling a simple and clean way to bring your 3D experiences into the Looking Glass. 
