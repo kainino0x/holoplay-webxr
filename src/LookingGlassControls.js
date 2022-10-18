@@ -196,14 +196,6 @@ export function makeControls(lkgCanvas) {
         fixRange: v => v,
         stringify: v => v.toFixed(2) + ' m',
       });
-    const setTargetDiam = addControl('targetDiam',
-      { type: 'range', min: 0.2, max: 20, step: 0.1 },
-      {
-        label: 'target size',
-        title: 'diameter of the target sphere to fit in the screen',
-        fixRange: v => Math.max(0.2, v),
-        stringify: v => `${(v * 100).toFixed()} cm`,
-      });
   
     addControl('fovy',
       { type: 'range', min: 1.0 / 180 * Math.PI, max: 120.1 / 180 * Math.PI, step: 1.0 / 180 * Math.PI },
@@ -239,12 +231,11 @@ export function makeControls(lkgCanvas) {
     lkgCanvas.oncontextmenu = ev => { ev.preventDefault() };
   
     lkgCanvas.addEventListener('wheel', ev => {
-      setTargetDiam(old => {
+        const old = cfg.targetDiam
         const GAMMA = 1.1;
         const logOld = Math.log(old) / Math.log(GAMMA);
-        return Math.pow(GAMMA, logOld + ev.deltaY * 0.01);
+        return cfg.targetDiam = Math.pow(GAMMA, logOld + ev.deltaY * 0.01);
       });
-    });
   
     lkgCanvas.addEventListener('mousemove', ev => {
       const mx = ev.movementX, my = -ev.movementY;
