@@ -1,4 +1,10 @@
-# **This fork is no longer maintained!** Please move to https://github.com/Looking-Glass/looking-glass-webxr
+# **No longer maintained!** Please move to https://github.com/Looking-Glass/looking-glass-webxr
+
+<details><summary>
+
+## Original README
+
+</summary>
 
 # WebXR for HoloPlay (Unofficial!)
 
@@ -42,3 +48,5 @@ has been modified to unconditionally use WebXR for HoloPlay instead.
 
 - `npm run build` to build.
 - `npm run serve` to serve the demos.
+
+</details>
