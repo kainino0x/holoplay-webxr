@@ -24,7 +24,7 @@ On MacOS systems you must have chrome or Firefox be in windowed mode, and not ru
 This library is published on npm you can install it by running `npm install @lookingglass/webxr` just install the library and copy/paste the following snippet into your WebXR project and you're good to go! 
 
 ```javascript
-import { LookingGlassWebXRPolyfill, LookingGlassConfig } from "https://unpkg.com/@lookingglass/webxr@0.1.9/dist/@lookingglass/webxr.js"
+import { LookingGlassWebXRPolyfill, LookingGlassConfig } from "@lookingglass/webxr"
 const config = LookingGlassConfig
 config.tileHeight = 512
 config.numViews = 45
