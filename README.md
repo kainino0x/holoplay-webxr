@@ -55,6 +55,7 @@ or, if you use the yarn package manager.
 #### Using a Script Tag
 You can also use a `<script>` tag, like shown in the following examples: 
 
+```javascript
 <script type="module">
 import { LookingGlassWebXRPolyfill, LookingGlassConfig } from "https://unpkg.com/@lookingglass/webxr@0.1.9/dist/@lookingglass/webxr.js"
 const config = LookingGlassConfig
@@ -66,6 +67,7 @@ config.targetDiam = 3
 config.fovy = (14 * Math.PI) / 180
 new LookingGlassWebXRPolyfill()
 </script>
+```
 
 ### Demos
 We've got some demos setup for [three.js](https://docs.lookingglassfactory.com/developer-tools/webxr/three.js), [react-three-fiber](https://docs.lookingglassfactory.com/developer-tools/webxr/react-three-fiber), and [Spline](https://docs.lookingglassfactory.com/developer-tools/webxr/spline)
