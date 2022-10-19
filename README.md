@@ -1,3 +1,5 @@
+# **This fork is no longer maintained!** Please move to https://github.com/Looking-Glass/looking-glass-webxr
+
 # WebXR for HoloPlay (Unofficial!)
 
 Implements the WebXR API (using [webxr-polyfill](https://github.com/immersive-web/webxr-polyfill))
