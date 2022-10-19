@@ -1,55 +1,73 @@
 # Looking Glass WebXR Library
 
-This library implements the WebXR API (using [webxr-polyfill](https://github.com/immersive-web/webxr-polyfill))
-for [Looking Glass Factory](https://lookingglassfactory.com/)'s Looking Glass displays. Using this allows you to bring your three.js or babylon.js scenes into the Looking Glass without having to modify either library, enabling a simple and clean way to bring your 3D experiences into the Looking Glass. 
+**In order to use Looking Glass WebXR with your Looking Glass you must install Looking Glass Bridge -> [Download it here.](https://lookingglassfactory.com/software/looking-glass-bridge)**
 
-Thanks to [Kai Ninomiya](https://kai.graphics/) for putting in the time and effort to develop this library, and allowing Looking Glass to maintain this fork. 
+The Looking Glass WebXR Library provides a WebXR API for targeting Looking Glass displays, this means that any 3D web framework that supports WebXR will work with the Looking Glass WebXR library. Ready to turn the internet holographic? Let's have some fun!
 
-Thanks to [WebXR Emulator Extension](https://github.com/MozillaReality/WebXR-emulator-extension)
-from which the skeleton of this project is built.
+Looking Glass WebXR works in Chromium based browsers and Firefox, though we recommend chrome-based browsers for best performance.
+Safari is not currently supported.
 
-## How to use
+We've tested our WebXR Library with the following WebGL frameworks. If you use one and don't see it here, reach out on discord! We'd love to support as many as possible, it's likely yours may work too! 
+- Three.JS (v141+) 
+- Babylon.JS (v5.0+)
+- PlayCanvas ()
 
-This library is published on [npm](https://www.npmjs.com/package/@lookingglass/webxr) you can install it by running `npm install @lookingglass/webxr`
+### Using WebXR
+To view a WebXR project on your Looking Glass you'll need to click the "View in XR" button. 
+This will open up a small pop-up window. 
+Drag this over to your Looking Glass display and then double click to have the hologram display properly. 
 
-There are two main imports you'll need to import as follows: 
-- `import {LookingGlassWebXRPolyfill, LookingGlassConfig }from "@lookingglass/webxr"` 
+On MacOS systems you must have chrome or Firefox be in windowed mode, and not running in Fullscreen. Running in full screen will cause the window to open in a new tab instead of a new window. 
 
-Once you've imported the packages you'll need to define both the LookingGlassConfig as well as the LookingGlassWebXRPolyfill. 
+### Developing with the Looking Glass WebXR Library
 
-The `LookingGlassConfig` controls the holographic camera and has the following properties: 
-- **tileHeight** - defines the height of the individual quilt view, the width is then set based on the aspect ratio of the connected device. 
-- **numViews** - defines the number of views to be rendered
-- **targetX** - defines the position of the camera on the X-axis
-- **targetY** - defines the position of the camera on the Y-axis
-- **targetZ** - defines the position of the camera on the Z-axis
-- **trackballX** - defines the rotation of the camera on the X-axis
-- **trackballZ** - defines the rotation of the camera on the Z-axis
-- **targetDiam** - defines the size of the camera, this makes your scene bigger or smaller without changing the focus. 
-- **fovy** - defines the vertical FOV of your camera (defined in radians)
-- **depthiness** - modifies to the view frustum to increase or decrease the perceived depth of the scene. 
-- **inlineView**- changes how the original canvas on your main web page is displayed, can show the encoded subpixel matrix, a single centered view, or a quilt view. 
+This library is published on npm you can install it by running `npm install @lookingglass/webxr`
 
-The `LookingGlassWebXRPolyfill` implements the WebXR override and allows you to target the Looking Glass. 
+There are two main imports you'll need to import as follows:
+`import {LookingGlassWebXRPolyfill, LookingGlassConfig }from "@lookingglass/webxr"`
 
-## Status
+Once you've imported the packages you'll need to define both the LookingGlassConfig as well as the LookingGlassWebXRPolyfill.
+The LookingGlassConfig controls the holographic camera and has the following properties:
+tileHeight   - defines the height of the individual quilt view, the width is then set based on the aspect ratio of the connected device.
+- numViews   - defines the number of views to be rendered
+- targetX    - defines the position of the camera on the X-axis
+- targetY    - defines the position of the camera on the Y-axis
+- targetZ    - defines the position of the camera on the Z-axis
+- trackballX - defines the rotation of the camera on the X-axis
+- trackballZ - defines the rotation of the camera on the Z-axis
+- targetDiam - defines the size of the camera, this makes your scene bigger or smaller without changing the focus.
+- fovy       - defines the vertical FOV of your camera (defined in radians)
+- depthiness - modifies to the view frustum to increase or decrease the perceived depth of the scene.
+- inlineView - changes how the original canvas on your main web page is displayed, can show the encoded subpixel matrix, a single centered view, or a quilt view.
 
-- Tested on all Looking Glass gen 1 and Looking Glass gen 2 devices. 
+The `LookingGlassWebXRPolyfill` implements the WebXR override and allows you to target the Looking Glass.
 
-- This library currently runs on Chrome and Firefox, though we recommend Chrome (or a chromium based browser) for best performance. Safari currently does not work due to a limitation with their websocket API, and inability to communicate with Looking Glass Bridge.
+### Installation
+Since Looking Glass WebXR is engine agnostic there are a few settings that will be the same regardless of what 3D engine you're working with. 
 
-## Compatibility
+#### Using NPM/Yarn
+You can import the Looking Glass WebXR library by running the following command in your web project.
 
-- [webxr-samples](https://github.com/immersive-web/webxr-samples): Works!
-- Three.js: works as of v141 release (thanks to @CodyJasonBennet for the PR [here](https://github.com/mrdoob/three.js/pull/23972)!)
-    ([tested page](https://threejs.org/examples/webxr_vr_cubes.html))
-- Babylon.js: Works! [Fixed](https://github.com/BabylonJS/Babylon.js/pull/9853) in version `5.0.0-alpha.9`.
-    ([tested page](https://playground.babylonjs.com/#F41V6N))
+`npm install @lookingglass/webxr`
+or, if you use the yarn package manager. 
+`yarn install @lookingglass/webxr`
 
-## Hacking
+#### Using a Script Tag
+You can also use a `<script>` tag, like shown in the following examples: 
 
-- `npm run build` to build.
+<script type="module">
+import { LookingGlassWebXRPolyfill, LookingGlassConfig } from "https://unpkg.com/@lookingglass/webxr@0.1.9/dist/@lookingglass/webxr.js"
+const config = LookingGlassConfig
+config.tileHeight = 512
+config.numViews = 45
+config.targetY = 0
+config.targetZ = 0
+config.targetDiam = 3
+config.fovy = (14 * Math.PI) / 180
+new LookingGlassWebXRPolyfill()
+</script>
 
-## Linking Locally
+### Demos
+We've got some demos setup for [three.js](https://docs.lookingglassfactory.com/developer-tools/webxr/three.js), [react-three-fiber](https://docs.lookingglassfactory.com/developer-tools/webxr/react-three-fiber), and [Spline](https://docs.lookingglassfactory.com/developer-tools/webxr/spline)
 
-- in order to build locally and link as a dependency to another project you must comment out the `external` line in the `vite.config.js` file, then run `npm run build` after that you can run `npm link` or `yarn link` to use the local package as a sym-link in your project. 
+### The Looking Glass WebXR Library is open source and originally developed by [Kai Ninomiya](https://kai.graphics). We're excited to continue working in and supporting open-source technology!
