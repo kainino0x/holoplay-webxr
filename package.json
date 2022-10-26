@@ -1,10 +1,12 @@
 {
   "name": "@lookingglass/webxr",
   "type": "module",
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "main": "./dist/webxr.umd.cjs",
   "module": "./dist/webxr.js",
-  "exports":{
+  "exports": {
     ".": {
       "import": "./dist/@lookingglass/webxr.js",
       "require": "./dist/@lookingglass/webxr.umd.cjs"
@@ -25,9 +27,9 @@
     "vite": "^3.1.2"
   },
   "dependencies": {
-    "@lookingglass/webxr-polyfill": "0.1.1",
+    "@lookingglass/webxr-polyfill": "^0.1.1",
     "gl-matrix": "^2.8.1",
-    "holoplay-core": "0.0.9"
+    "holoplay-core": "^0.0.9"
   },
   "bugs": {
     "url": "https://github.com/Looking-Glass/looking-glass-webxr/issues"
