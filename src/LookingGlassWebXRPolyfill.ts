@@ -14,32 +14,44 @@
  * limitations under the License.
  */
 
-import WebXRPolyfill from '@lookingglass/webxr-polyfill/src/WebXRPolyfill';
-import XRSystem from '@lookingglass/webxr-polyfill/src/api/XRSystem';
-import API from '@lookingglass/webxr-polyfill/src/api/index';
-import LookingGlassXRDevice from './LookingGlassXRDevice';
-import LookingGlassXRWebGLLayer from './LookingGlassXRWebGLLayer';
-import getLookingGlassConfig from './LookingGlassConfig';
+import WebXRPolyfill from "@lookingglass/webxr-polyfill/src/WebXRPolyfill"
+import XRSystem from "@lookingglass/webxr-polyfill/src/api/XRSystem"
+import API from "@lookingglass/webxr-polyfill/src/api/index"
+import LookingGlassXRDevice from "./LookingGlassXRDevice"
+import LookingGlassXRWebGLLayer from "./LookingGlassXRWebGLLayer"
+import { ConfigType, getLookingGlassConfig } from "./LookingGlassConfig"
 
 export class LookingGlassWebXRPolyfill extends WebXRPolyfill {
-  constructor(message) {
-    super();
+	constructor(cfg?: Partial<ConfigType>) {
+		super()
 
-    console.warn(message || 'Looking Glass WebXR "polyfill" overriding native WebXR API.');
-    for (const className in API) {
-      this.global[className] = API[className];
-    }
-    this.global.XRWebGLLayer = LookingGlassXRWebGLLayer;
+		// Init the configuration
+		getLookingGlassConfig(cfg)
 
-    this.injected = true;
+		console.warn('Looking Glass WebXR "polyfill" overriding native WebXR API.')
+		for (const className in API) {
+			this.global[className] = API[className]
+		}
+		this.global.XRWebGLLayer = LookingGlassXRWebGLLayer
 
-    const devicePromise = Promise.resolve(new LookingGlassXRDevice(this.global));
-    this.xr = new XRSystem(devicePromise);
-    Object.defineProperty(this.global.navigator, 'xr', {
-      value: this.xr,
-      configurable: true,
-    });
-  }
+		this.injected = true
+
+		const devicePromise = Promise.resolve(new LookingGlassXRDevice(this.global))
+		this.xr = new XRSystem(devicePromise)
+		Object.defineProperty(this.global.navigator, "xr", {
+			value: this.xr,
+			configurable: true,
+		})
+	}
+
+	public get config() {
+		return getLookingGlassConfig()
+	}
+
+	public set config(v: Partial<ConfigType>) {
+		getLookingGlassConfig(v)
+	}
 }
 
-export const LookingGlassConfig = getLookingGlassConfig()
+const test = new LookingGlassWebXRPolyfill()
+test.config = { tileHeight: 3 }

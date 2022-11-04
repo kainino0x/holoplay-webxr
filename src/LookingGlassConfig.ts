@@ -14,131 +14,309 @@
  * limitations under the License.
  */
 
-import * as HoloPlayCore from 'holoplay-core/dist/holoplaycore.module.js';
+import * as HoloPlayCore from "holoplay-core"
 
-export const kDefaultEyeHeight = 1.6;
+const DefaultCalibration = {
+	configVersion: "1.0",
+	pitch: { value: 45 },
+	slope: { value: -5 },
+	center: { value: -0.5 },
+	viewCone: { value: 40 },
+	invView: { value: 1 },
+	verticalAngle: { value: 0 },
+	DPI: { value: 338 },
+	screenW: { value: 250 },
+	screenH: { value: 250 },
+	flipImageX: { value: 0 },
+	flipImageY: { value: 0 },
+	flipSubp: { value: 0 },
+}
 
-let config;
-export default function getLookingGlassConfig() {
-  if (config === undefined) config = makeConfig();
-  return config;
-};
+export const DefaultEyeHeight: number = 1.6
+const DefaultConfig = {
+	tileHeight: 512,
+	numViews: 45,
+	trackballX: 0,
+	trackballY: 0,
+	targetX: 0,
+	targetY: DefaultEyeHeight,
+	targetZ: -0.5,
+	targetDiam: 2.0,
+	fovy: (13.0 / 180) * Math.PI,
+	depthiness: 1.25,
+	inlineView: 1,
+}
 
-const kFakeCalibration = {
-  configVersion: "1.0",
-  pitch: { value: 45 },
-  slope: { value: -5 },
-  center: { value: -0.5 },
-  viewCone: { value: 40 },
-  invView: { value: 1 },
-  verticalAngle: { value: 0 },
-  DPI: { value: 338 },
-  screenW: { value: 250 },
-  screenH: { value: 250 },
-  flipImageX: { value: 0 },
-  flipImageY: { value: 0 },
-  flipSubp: { value: 0 },
-};
+export type CalibrationType = typeof DefaultCalibration
+export type ConfigType = typeof DefaultConfig
 
-const makeConfig = () => new class extends EventTarget {
-  constructor() {
-    super();
+export class LookingGlassConfig extends EventTarget {
+	private _calibration: CalibrationType = deepFreeze(DefaultCalibration)
+	private _config: ConfigType = deepFreeze(DefaultConfig)
 
-    const fireChanged = (dispatch) => {
-      if (dispatch) this.dispatchEvent(new Event('on-config-changed'));
-      const changePromise = new Promise(r => { this._ensureConfigChangeEvent = r; });
-      changePromise.then(() => fireChanged(true));
-    };
-    fireChanged(false);
+	constructor(cfg?: Partial<ConfigType>) {
+		super()
+		this._config = { ...this._config, ...cfg }
+		this.syncCalibration()
+	}
 
-    // Placeholder values while we wait for the Looking Glass Bridge.
-    this.calibration = kFakeCalibration;
+	private syncCalibration() {
+		const client = new HoloPlayCore.Client(
+			(msg) => {
+				if (msg.devices.length < 1) {
+					console.error("No Looking Glass devices found!")
+					return
+				}
+				if (msg.devices.length > 1) {
+					console.warn("More than one Looking Glass device found... using the first one")
+				}
+				this.calibration = msg.devices[0].calibration
+			},
+			(err) => {
+				console.error("Error creating Looking Glass client:", err)
+			}
+		)
+	}
 
-    const client = new HoloPlayCore.Client(
-      (msg) => {
-        if (msg.devices.length < 1) {
-          console.error('No Looking Glass devices found!');
-          return;
-        }
-        if (msg.devices.length > 1) {
-          console.warn('More than one Looking Glass device found... using the first one');
-        }
-        this.calibration = msg.devices[0].calibration;
-      },
-      (err) => {
-        console.error('Error creating Looking Glass client:', err);
-      });
+	private onConfigChange() {
+		this.dispatchEvent(new Event("on-config-changed"))
+	}
 
-    // Set defaults for configurable things
-    this.tileHeight = 512;
-    this.numViews = 45;
-    this.trackballX = 0;
-    this.trackballY = 0;
-    this.targetX = 0;
-    this.targetY = kDefaultEyeHeight;
-    this.targetZ = -0.5;
-    this.targetDiam = 2.0;
-    this.fovy = 13.0 / 180 * Math.PI;
-    this.depthiness = 1.25;
-    this.inlineView = 1;
-  }
+	public get calibration(): CalibrationType {
+		return this._calibration
+	}
 
-  get calibration() { return this._calibration; }
-  set calibration(v) { this._calibration = deepFreeze(v); this._ensureConfigChangeEvent(); }
+	public set calibration(value: Partial<CalibrationType>) {
+		this._calibration = {
+			...this._calibration,
+			...value,
+		}
+		this.onConfigChange()
+	}
 
-  // configurable
+	public get config(): ConfigType {
+		return this._config
+	}
 
-  get tileHeight() { return this._tileHeight; } set tileHeight(v) { this._tileHeight = v; this._ensureConfigChangeEvent(); }
-  get numViews  () { return this._numViews;   } set numViews  (v) { this._numViews   = v; this._ensureConfigChangeEvent(); }
-  get targetX   () { return this._targetX;    } set targetX   (v) { this._targetX    = v; this._ensureConfigChangeEvent(); }
-  get targetY   () { return this._targetY;    } set targetY   (v) { this._targetY    = v; this._ensureConfigChangeEvent(); }
-  get targetZ   () { return this._targetZ;    } set targetZ   (v) { this._targetZ    = v; this._ensureConfigChangeEvent(); }
-  get trackballX() { return this._trackballX; } set trackballX(v) { this._trackballX = v; this._ensureConfigChangeEvent(); }
-  get trackballY() { return this._trackballY; } set trackballY(v) { this._trackballY = v; this._ensureConfigChangeEvent(); }
-  get targetDiam() { return this._targetDiam; } set targetDiam(v) { this._targetDiam = v; this._ensureConfigChangeEvent(); }
-  get fovy      () { return this._fovy;       } set fovy      (v) { this._fovy       = v; this._ensureConfigChangeEvent(); }
-  get depthiness() { return this._depthiness; } set depthiness(v) { this._depthiness = v; this._ensureConfigChangeEvent(); }
-  get inlineView() { return this._inlineView; } set inlineView(v) { this._inlineView = v; this._ensureConfigChangeEvent(); }
+	public set config(value: Partial<ConfigType> | undefined) {
+		if (value != undefined) {
+			this._config = {
+				...this._config,
+				...value,
+			}
+			this.onConfigChange()
+		}
+	}
 
-  // computed
+	// configurable
 
-  get aspect() { return this.calibration.screenW.value / this.calibration.screenH.value; }
-  get tileWidth() { return Math.round(this.tileHeight * this.aspect); }
-  get framebufferWidth() {
-    const numPixels = this.tileWidth * this.tileHeight * this.numViews;
-    return 2 ** Math.ceil(Math.log2(Math.max(Math.sqrt(numPixels), this.tileWidth)));
-  }
-  get quiltWidth() { return Math.floor(this.framebufferWidth / this.tileWidth); }
-  get quiltHeight() { return Math.ceil(this.numViews / this.quiltWidth); }
-  get framebufferHeight() { return 2 ** Math.ceil(Math.log2(this.quiltHeight * this.tileHeight)); }
+	/**
+	 * defines the height of the individual quilt view, the width is then set based on the aspect ratio of the connected device.
+	 */
+	public get tileHeight(): number {
+		return this._config.tileHeight
+	}
 
-  get viewCone() { return this.calibration.viewCone.value * this.depthiness / 180 * Math.PI; }
-  get tilt() {
-    return this.calibration.screenH.value /
-      (this.calibration.screenW.value * this.calibration.slope.value) *
-      (this.calibration.flipImageX.value ? -1 : 1);
-  }
-  get subp() { return 1 / (this.calibration.screenW.value * 3); }
-  get pitch() {
-    const screenInches = this.calibration.screenW.value / this.calibration.DPI.value;
-    return this.calibration.pitch.value * screenInches *
-      Math.cos(Math.atan(1.0 / this.calibration.slope.value));
-  }
-};
+	set tileHeight(v: number) {
+		this._config.tileHeight = v
+		this.onConfigChange()
+	}
 
-function deepFreeze(o) {
-  Object.freeze(o);
-  if (o === undefined) {
-    return o;
-  }
+	/**
+	 * defines the number of views to be rendered
+	 */
+	get numViews() {
+		return this._config.numViews
+	}
 
-  Object.getOwnPropertyNames(o).forEach(function (prop) {
-    if (o[prop] !== null
-      && (typeof o[prop] === 'object' || typeof o[prop] === 'function')
-      && !Object.isFrozen(o[prop])) {
-      deepFreeze(o[prop]);
-    }
-  });
+	set numViews(v) {
+		this._config.numViews = v
+		this.onConfigChange()
+	}
 
-  return o;
-};
+	/**
+	 * defines the position of the camera on the X-axis
+	 */
+	get targetX() {
+		return this._config.targetX
+	}
+
+	set targetX(v) {
+		this._config.targetX = v
+		this.onConfigChange()
+	}
+
+	/**
+	 * defines the position of the camera on the Y-axis
+	 */
+	get targetY() {
+		return this._config.targetY
+	}
+
+	set targetY(v) {
+		this._config.targetY = v
+		this.onConfigChange()
+	}
+
+	/**
+	 * defines the position of the camera on the X-axis
+	 */
+	get targetZ() {
+		return this._config.targetZ
+	}
+
+	set targetZ(v) {
+		this._config.targetZ = v
+		this.onConfigChange()
+	}
+
+	/**
+	 * defines the rotation of the camera on the X-axis
+	 */
+	get trackballX() {
+		return this._config.trackballX
+	}
+
+	set trackballX(v) {
+		this._config.trackballX = v
+		this.onConfigChange()
+	}
+
+	/**
+	 * defines the rotation of the camera on the Y-axis
+	 */
+	get trackballY() {
+		return this._config.trackballY
+	}
+
+	set trackballY(v) {
+		this._config.trackballY = v
+		this.onConfigChange()
+	}
+
+	/**
+	 * defines the size of the camera, this makes your scene bigger or smaller without changing the focus.
+	 */
+	get targetDiam() {
+		return this._config.targetDiam
+	}
+
+	set targetDiam(v) {
+		this._config.targetDiam = v
+		this.onConfigChange()
+	}
+
+	/**
+	 * defines the vertical FOV of your camera (defined in radians)
+	 */
+	get fovy() {
+		return this._config.fovy
+	}
+
+	set fovy(v) {
+		this._config.fovy = v
+		this.onConfigChange()
+	}
+
+	/**
+	 * modifies to the view frustum to increase or decrease the perceived depth of the scene.
+	 */
+	get depthiness() {
+		return this._config.depthiness
+	}
+
+	set depthiness(v) {
+		this._config.depthiness = v
+		this.onConfigChange()
+	}
+
+	/**
+	 * changes how the original canvas on your main web page is displayed, can show the encoded subpixel matrix, a single centered view, or a quilt view.
+	 */
+	get inlineView() {
+		return this._config.inlineView
+	}
+
+	set inlineView(v) {
+		this._config.inlineView = v
+		this.onConfigChange()
+	}
+
+	// Computed
+
+	public get aspect() {
+		return this._calibration.screenW.value / this._calibration.screenH.value
+	}
+
+	public get tileWidth() {
+		return Math.round(this.tileHeight * this.aspect)
+	}
+
+	public get framebufferWidth() {
+		const numPixels = this.tileWidth * this.tileHeight * this.numViews
+		return 2 ** Math.ceil(Math.log2(Math.max(Math.sqrt(numPixels), this.tileWidth)))
+	}
+
+	public get quiltWidth() {
+		return Math.floor(this.framebufferWidth / this.tileWidth)
+	}
+
+	public get quiltHeight() {
+		return Math.ceil(this.numViews / this.quiltWidth)
+	}
+
+	public get framebufferHeight() {
+		return 2 ** Math.ceil(Math.log2(this.quiltHeight * this.tileHeight))
+	}
+
+	public get viewCone() {
+		return ((this._calibration.viewCone.value * this.depthiness) / 180) * Math.PI
+	}
+
+	public get tilt() {
+		return (
+			(this._calibration.screenH.value / (this._calibration.screenW.value * this._calibration.slope.value)) *
+			(this._calibration.flipImageX.value ? -1 : 1)
+		)
+	}
+
+	public get subp() {
+		return 1 / (this._calibration.screenW.value * 3)
+	}
+
+	public get pitch() {
+		const screenInches = this._calibration.screenW.value / this._calibration.DPI.value
+		return (
+			this._calibration.pitch.value * screenInches * Math.cos(Math.atan(1.0 / this._calibration.slope.value))
+		)
+	}
+}
+
+let globalLkgConfig: LookingGlassConfig | null = null
+export function getLookingGlassConfig(config?: Partial<ConfigType>) {
+	if (globalLkgConfig == null) {
+		globalLkgConfig = new LookingGlassConfig(config)
+	} else {
+		globalLkgConfig.config = config
+	}
+	return globalLkgConfig
+}
+
+function deepFreeze<T extends object>(o: T): T {
+	Object.freeze(o)
+	if (o === undefined) {
+		return o
+	}
+
+	Object.getOwnPropertyNames(o).forEach(function (prop) {
+		if (
+			o[prop] !== null &&
+			(typeof o[prop] === "object" || typeof o[prop] === "function") &&
+			!Object.isFrozen(o[prop])
+		) {
+			deepFreeze(o[prop])
+		}
+	})
+
+	return o
+}

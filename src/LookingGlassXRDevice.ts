@@ -18,7 +18,7 @@ import XRDevice from '@lookingglass/webxr-polyfill/src/devices/XRDevice';
 import XRSpace from '@lookingglass/webxr-polyfill/src/api/XRSpace'
 import { mat4 } from 'gl-matrix';
 import { PRIVATE as LookingGlassXRWebGLLayer_PRIVATE } from './LookingGlassXRWebGLLayer';
-import getLookingGlassConfig, { kDefaultEyeHeight } from './LookingGlassConfig';
+import { DefaultEyeHeight, getLookingGlassConfig } from './LookingGlassConfig';
 
 export default class LookingGlassXRDevice extends XRDevice {
   constructor(global) {
@@ -138,7 +138,7 @@ export default class LookingGlassXRDevice extends XRDevice {
         renderState.depthNear, renderState.depthFar);
 
       // View
-      mat4.fromTranslation(this.basePoseMatrix, [0, kDefaultEyeHeight, 0]);
+      mat4.fromTranslation(this.basePoseMatrix, [0, DefaultEyeHeight, 0]);
       mat4.invert(this.inlineInverseViewMatrix, this.basePoseMatrix);
     }
   }
@@ -153,7 +153,7 @@ export default class LookingGlassXRDevice extends XRDevice {
     switch (type) {
       case 'viewer':
       case 'local':
-        mat4.fromTranslation(matrix, [0, -kDefaultEyeHeight, 0]);
+        mat4.fromTranslation(matrix, [0, -DefaultEyeHeight, 0]);
         return matrix;
       case 'local-floor':
         return matrix;
@@ -244,18 +244,27 @@ export default class LookingGlassXRDevice extends XRDevice {
 
 let SESSION_ID = 0;
 class Session {
-  constructor(mode, enabledFeatures) {
-    this.mode = mode;
-    this.immersive = mode === 'immersive-vr' || mode === 'immersive-ar';
-    this.id = ++SESSION_ID;
-    this.baseLayer = null;
-    this.inlineVerticalFieldOfView = Math.PI * 0.5;
-    this.ended = false;
-    this.enabledFeatures = enabledFeatures;
-  }
+	public mode: any;
+	public immersive: boolean;
+	public id: any;
+	public baseLayer: any;
+	public inlineVerticalFieldOfView: number
+  public ended: boolean
+  public enabledFeatures: any
+
+	constructor(mode, enabledFeatures) {
+		this.mode = mode;
+		this.immersive = mode === "immersive-vr" || mode === "immersive-ar";
+		this.id = ++SESSION_ID;
+		this.baseLayer = null;
+		this.inlineVerticalFieldOfView = Math.PI * 0.5;
+		this.ended = false;
+		this.enabledFeatures = enabledFeatures;
+	}
 }
 
 class LookingGlassXRSpace extends XRSpace {
+  public viewIndex:any
   constructor(viewIndex) {
     super();
     this.viewIndex = viewIndex;
